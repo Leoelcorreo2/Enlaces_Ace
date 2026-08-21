@@ -1,30 +1,44 @@
 [
-  {
-    "Nombre": "Stream 1",
-    "URL": "acestream://d65257bb934b73647374224fd62d836815804be2"
-  },
-  {
-    "Nombre": "Stream 2",
-    "URL": "acestream://27d11bbeb3026231d52de16b1fac48da7a099247"
-  },
-  {
-    "Nombre": "Stream 3",
-    "URL": "acestream://f16d68fa5ff64f3894a45062ca28e4e66f142c6a"
-  },
-  {
-    "Nombre": "Stream 4",
-    "URL": "acestream://20086a76248efe8d5230c15d41c69bae8fa6381c"
-  },
-  {
-    "Nombre": "Stream 5",
-    "URL": "acestream://02be332ebead0484a5354fa25e97b6833b8b129e"
-  },
-  {
-    "Nombre": "Stream 6",
-    "URL": "acestream://0a81ba020d498aca1248e0591d8ffab99eb80bd4"
-  },
-  {
-    "Nombre": "Stream 7",
-    "URL": "acestream://f8b0eae8fda973cf426311541d1668aa592f0a8c"
-  }
+    {
+        "Nombre": "Enlace 1",
+        "ID_Aces_Stream": "d65257bb934b73647374224fd62d836815804be2",
+        "Nota": 10,
+        "URL": "acestream://d65257bb934b73647374224fd62d836815804be2"
+    },
+    {
+        "Nombre": "Enlace 2",
+        "ID_Aces_Stream": "27d11bbeb3026231d52de16b1fac48da7a099247",
+        "Nota": 8,
+        "URL": "acestream://27d11bbeb3026231d52de16b1fac48da7a099247"
+    },
+    {
+        "Nombre": "Enlace 3",
+        "ID_Aces_Stream": "f16d68fa5ff64f3894a45062ca28e4e66f142c6a",
+        "Nota": 7,
+        "URL": "acestream://f16d68fa5ff64f3894a45062ca28e4e66f142c6a"
+    },
+    {
+        "Nombre": "Enlace 4",
+        "ID_Aces_Stream": "20086a76248efe8d5230c15d41c69bae8fa6381c",
+        "Nota": 6,
+        "URL": "acestream://20086a76248efe8d5230c15d41c69bae8fa6381c"
+    },
+    {
+        "Nombre": "Enlace 5",
+        "ID_Aces_Stream": "02be332ebead0484a5354fa25e97b6833b8b129e",
+        "Nota": 4,
+        "URL": "acestream://02be332ebead0484a5354fa25e97b6833b8b129e"
+    },
+    {
+        "Nombre": "Enlace 6",
+        "ID_Aces_Stream": "0a81ba020d498aca1248e0591d8ffab99eb80bd4",
+        "Nota": 4,
+        "URL": "acestream://0a81ba020d498aca1248e0591d8ffab99eb80bd4"
+    },
+    {
+        "Nombre": "Enlace 7",
+        "ID_Aces_Stream": "f8b0eae8fda973cf426311541d1668aa592f0a8c",
+        "Nota": 4,
+        "URL": "acestream://f8b0eae8fda973cf426311541d1668aa592f0a8c"
+    }
 ]

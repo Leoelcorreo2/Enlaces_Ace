@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080b12">
+<title>ACE GRID • F1 Stream Launcher</title>
+<style>
+:root{
+  --bg:#070910; --panel:#101521; --panel2:#151c2a; --text:#f5f7fb;
+  --muted:#9ba6b8; --red:#e10600; --red2:#ff3b30; --line:#273044;
+  --green:#42d392; --yellow:#ffd166;
+}
+*{box-sizing:border-box}
+body{margin:0;background:
+ radial-gradient(circle at 20% 0%,rgba(225,6,0,.18),transparent 28rem),
+ linear-gradient(145deg,#070910,#0b0f18 55%,#080a10);
+ color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;min-height:100vh}
+body:before{content:"";position:fixed;inset:auto 0 0;height:7px;background:repeating-linear-gradient(135deg,#fff 0 22px,#111 22px 44px);opacity:.9}
+header{position:sticky;top:0;z-index:5;background:rgba(7,9,16,.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+.top{max-width:1100px;margin:auto;padding:16px 16px 13px;display:flex;gap:14px;align-items:center}
+.logo{width:52px;height:52px;border-radius:14px;background:var(--red);display:grid;place-items:center;font-weight:950;font-style:italic;font-size:17px;box-shadow:0 8px 30px rgba(225,6,0,.35)}
+h1{font-size:clamp(20px,4vw,30px);margin:0;font-weight:900;letter-spacing:-.04em}
+.sub{color:var(--muted);font-size:13px;margin-top:3px}
+main{max-width:1100px;margin:auto;padding:18px 16px 45px}
+.toolbar{display:grid;grid-template-columns:1fr auto auto;gap:9px;margin-bottom:15px}
+input,button{font:inherit}
+input{width:100%;background:var(--panel);border:1px solid var(--line);color:var(--text);padding:12px 13px;border-radius:12px;outline:none}
+button{border:0;border-radius:12px;padding:11px 14px;font-weight:800;cursor:pointer}
+.btn{background:var(--panel2);color:var(--text);border:1px solid var(--line)}
+.btn-red{background:var(--red);color:#fff}
+.status{display:flex;justify-content:space-between;gap:10px;color:var(--muted);font-size:13px;margin:10px 2px 13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.card{background:linear-gradient(150deg,rgba(21,28,42,.98),rgba(12,16,25,.98));border:1px solid var(--line);border-radius:17px;padding:15px;position:relative;overflow:hidden}
+.card:after{content:"";position:absolute;right:-25px;top:-25px;width:80px;height:80px;border:3px solid rgba(225,6,0,.28);transform:rotate(45deg)}
+.badge{display:inline-flex;align-items:center;gap:6px;color:#fff;background:rgba(225,6,0,.14);border:1px solid rgba(225,6,0,.4);padding:5px 8px;border-radius:999px;font-size:11px;font-weight:900;text-transform:uppercase}
+.obs{font-size:18px;font-weight:850;margin:12px 0 9px;position:relative;z-index:1}
+.url{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;color:#b9c3d4;font-size:11px;word-break:break-all;background:#080b12;border-radius:10px;padding:9px}
+.actions{display:flex;gap:8px;margin-top:12px;position:relative;z-index:2}
+.actions a{flex:1;text-align:center;text-decoration:none}
+.empty{padding:40px;text-align:center;color:var(--muted);border:1px dashed var(--line);border-radius:16px}
+.note{margin-top:18px;padding:13px 15px;border-left:3px solid var(--yellow);background:rgba(255,209,102,.07);color:#d9deea;font-size:13px;line-height:1.45}
+@media(max-width:650px){.toolbar{grid-template-columns:1fr 1fr}.toolbar input{grid-column:1/-1}.top{padding:13px}.logo{width:45px;height:45px}}
+</style>
+</head>
+<body>
+<header>
+  <div class="top">
+    <div class="logo">ACE</div>
+    <div><h1>ACE GRID</h1><div class="sub">F1-style stream launcher</div></div>
+  </div>
+</header>
+<main>
+  <div class="toolbar">
+    <input id="search" placeholder="Buscar por observaciones o URL…">
+    <button class="btn" id="reload">↻ Actualizar</button>
+    <button class="btn-red" id="github">⚙ Fuente</button>
+  </div>
+  <div class="status"><span id="count">Cargando…</span><span id="source"></span></div>
+  <section id="grid" class="grid"></section>
+  <div class="note">
+    <b>Cómo funciona:</b> los botones intentan abrir el esquema <code>acestream://</code>.
+    En Android/Windows funcionará si existe una aplicación compatible con ese esquema.
+    Algunos navegadores muestran una confirmación antes de abrir la aplicación.
+  </div>
+</main>
+<script>
+const DATA_URL = new URLSearchParams(location.search).get("data") || "enlaces.json";
+const grid = document.querySelector("#grid"), search = document.querySelector("#search");
+const count = document.querySelector("#count"), source = document.querySelector("#source");
+
+let data = [];
+
+function normalize(row){
+  return {
+    Observaciones: row.Observaciones ?? row.observaciones ?? row.Nota ?? row.nota ?? "",
+    URL: row.URL ?? row.url ?? row.Enlace ?? row.enlace ?? ""
+  };
+}
+function render(){
+  const q = search.value.trim().toLowerCase();
+  const rows = data.filter(x => `${x.Observaciones} ${x.URL}`.toLowerCase().includes(q));
+  count.textContent = `${rows.length} enlace${rows.length===1?"":"s"}`;
+  if(!rows.length){ grid.innerHTML='<div class="empty">No hay resultados.</div>'; return; }
+  grid.innerHTML = rows.map((x,i)=>{
+    const u = String(x.URL).trim();
+    const safe = u.replace(/"/g,'&quot;');
+    return `<article class="card">
+      <span class="badge">● STREAM ${i+1}</span>
+      <div class="obs">${escapeHtml(x.Observaciones || "Sin observaciones")}</div>
+      <div class="url">${escapeHtml(u)}</div>
+      <div class="actions">
+        <a class="btn-red" href="${safe}" title="Intentar abrir AceStream">▶ Abrir AceStream</a>
+        <button class="btn" onclick='copyUrl(${JSON.stringify(u)})'>Copiar</button>
+      </div>
+    </article>`;
+  }).join("");
+}
+function escapeHtml(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));}
+async function copyUrl(u){
+  try{await navigator.clipboard.writeText(u); alert("URL copiada");}
+  catch(e){prompt("Copia la URL:",u);}
+}
+async function load(){
+  grid.innerHTML='<div class="empty">Cargando datos…</div>';
+  source.textContent=DATA_URL;
+  try{
+    const r=await fetch(DATA_URL,{cache:"no-store"});
+    if(!r.ok) throw new Error("HTTP "+r.status);
+    const text=await r.text();
+    if(DATA_URL.toLowerCase().endsWith(".csv")){
+      data=parseCSV(text).map(normalize);
+    }else{
+      const j=JSON.parse(text);
+      data=(Array.isArray(j)?j:(j.enlaces||j.data||[])).map(normalize);
+    }
+    render();
+  }catch(e){
+    grid.innerHTML='<div class="empty">No se pudo cargar el fichero.<br><small>'+escapeHtml(e.message)+'</small></div>';
+    count.textContent="Error";
+  }
+}
+function parseCSV(text){
+  const lines=text.replace(/^\uFEFF/,"").split(/\r?\n/).filter(Boolean);
+  if(!lines.length)return [];
+  const sep=lines[0].includes(";")?";":",";
+  const head=splitCSV(lines[0],sep);
+  return lines.slice(1).map(line=>{
+    const vals=splitCSV(line,sep), o={};
+    head.forEach((h,i)=>o[h.trim()]=vals[i]??""); return o;
+  });
+}
+function splitCSV(line,sep){
+  const out=[]; let cur="", q=false;
+  for(let i=0;i<line.length;i++){
+    const c=line[i];
+    if(c==='"' && line[i+1]==='"'){cur+='"';i++;continue}
+    if(c==='"'){q=!q;continue}
+    if(c===sep&&!q){out.push(cur);cur="";}else cur+=c;
+  }
+  out.push(cur); return out;
+}
+search.addEventListener("input",render);
+document.querySelector("#reload").onclick=load;
+document.querySelector("#github").onclick=()=>{
+  const u=prompt("URL RAW de GitHub del JSON/CSV:", DATA_URL);
+  if(u){location.search="?data="+encodeURIComponent(u);}
+};
+load();
+</script>
+</body>
+</html>

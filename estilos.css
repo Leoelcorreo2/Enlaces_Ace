@@ -1,423 +1,1616 @@
-<!DOCTYPE html>
-<html lang="es">
+/* =========================================================
+   GESTOR ACE STREAM - V2.1
+   ========================================================= */
 
-<head>
 
-    <meta charset="UTF-8">
+:root {
 
-    <meta
-        name="viewport"
-        content="width=device-width, initial-scale=1.0"
-    >
+    --fondo: #080b0f;
 
-    <meta
-        name="theme-color"
-        content="#080b0f"
-    >
+    --fondo-secundario: #10151b;
 
-    <meta
-        name="description"
-        content="Gestor de enlaces Ace Stream"
-    >
+    --tarjeta: #121820;
 
-    <title>Gestor Ace Stream</title>
+    --tarjeta-hover: #18212b;
 
-    <link
-        rel="stylesheet"
-        href="estilos.css?v=2.1"
-    >
+    --borde: #26313d;
 
-</head>
+    --texto: #f1f4f7;
 
+    --texto-secundario: #8995a3;
 
-<body>
+    --acento: #ff3b30;
 
+    --acento-hover: #ff554c;
 
-    <!-- =====================================================
-         CABECERA
-         ===================================================== -->
+    --verde: #35d07f;
 
-    <header class="cabecera">
+    --amarillo: #ffb347;
 
-        <div class="logo-area">
+    --radio: 12px;
 
-            <div class="logo-icon">
-                ▶
-            </div>
+    --sombra:
+        0 10px 30px rgba(0, 0, 0, 0.35);
+}
 
-            <div>
 
-                <h1>ACE STREAM</h1>
 
-                <span>
-                    GESTOR DE ENLACES
-                </span>
+/* =========================================================
+   GENERAL
+   ========================================================= */
 
-            </div>
+* {
+    box-sizing: border-box;
+}
 
-        </div>
 
+html {
+    min-height: 100%;
+}
 
-        <div class="contador">
 
-            <span id="contadorEnlaces">
-                0
-            </span>
+body {
 
-            <small>
-                ENLACES
-            </small>
+    margin: 0;
 
-        </div>
+    min-height: 100vh;
 
-    </header>
+    background:
+        radial-gradient(
+            circle at top right,
+            rgba(255, 59, 48, 0.08),
+            transparent 30%
+        ),
+        linear-gradient(
+            135deg,
+            #080b0f,
+            #0c1117
+        );
 
+    color: var(--texto);
 
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+}
 
-    <!-- =====================================================
-         CONTENIDO PRINCIPAL
-         ===================================================== -->
 
-    <main class="contenedor">
 
+/* =========================================================
+   CABECERA
+   ========================================================= */
 
-        <!-- =================================================
-             HERRAMIENTAS
-             ================================================= -->
+.cabecera {
 
-        <section class="herramientas">
+    height: 82px;
 
+    display: flex;
 
-            <div class="buscador">
+    align-items: center;
 
-                <span class="icono-busqueda">
-                    ⌕
-                </span>
+    justify-content: space-between;
 
-                <input
-                    type="text"
-                    id="buscador"
-                    placeholder="Buscar por nombre, ID o nota..."
-                    autocomplete="off"
-                >
+    padding: 0 30px;
 
-                <button
-                    type="button"
-                    id="limpiarBusqueda"
-                    class="boton-limpiar"
-                    title="Limpiar búsqueda"
-                >
-                    ×
-                </button>
+    background:
+        rgba(8, 11, 15, 0.96);
 
-            </div>
+    border-bottom:
+        1px solid var(--borde);
 
+    position: sticky;
 
-            <button
-                type="button"
-                id="nuevoEnlace"
-                class="boton-nuevo"
-            >
+    top: 0;
 
-                <span class="boton-nuevo-icono">
-                    +
-                </span>
+    z-index: 100;
 
-                <span>
-                    NUEVO ENLACE
-                </span>
+    backdrop-filter: blur(10px);
+}
 
-            </button>
 
+.logo-area {
 
-            <button
-                type="button"
-                id="recargar"
-                class="boton-recargar"
-                title="Recargar enlaces"
-            >
+    display: flex;
 
-                ↻
+    align-items: center;
 
-                <span>
-                    RECARGAR
-                </span>
+    gap: 14px;
+}
 
-            </button>
 
+.logo-icon {
 
-        </section>
+    width: 42px;
 
+    height: 42px;
 
+    display: flex;
 
-        <!-- =================================================
-             MENSAJES
-             ================================================= -->
+    align-items: center;
 
-        <div
-            id="mensaje"
-            class="mensaje"
-        ></div>
+    justify-content: center;
 
+    background: var(--acento);
 
+    color: white;
 
-        <!-- =================================================
-             LISTADO DE ENLACES
-             ================================================= -->
+    font-size: 20px;
 
-        <section
-            id="listaEnlaces"
-            class="lista-enlaces"
-        ></section>
+    font-weight: bold;
 
+    border-radius: 8px;
 
+    box-shadow:
+        0 0 20px rgba(255, 59, 48, 0.25);
+}
 
-        <!-- =================================================
-             SIN RESULTADOS
-             ================================================= -->
 
-        <section
-            id="sinResultados"
-            class="sin-resultados oculto"
-        >
+.logo-area h1 {
 
-            <div class="sin-resultados-icono">
-                ⌕
-            </div>
+    margin: 0;
 
-            <h2>
-                No se encontraron enlaces
-            </h2>
+    font-size: 20px;
 
-            <p>
-                Prueba con otro nombre, ID o nota.
-            </p>
+    letter-spacing: 2px;
 
-        </section>
+    font-weight: 800;
+}
 
 
-    </main>
+.logo-area span {
 
+    display: block;
 
+    margin-top: 3px;
 
-    <!-- =====================================================
-         MODAL NUEVO ENLACE
-         ===================================================== -->
+    color: var(--texto-secundario);
 
-    <div
-        id="modalNuevo"
-        class="modal-fondo oculto"
-        aria-hidden="true"
-    >
+    font-size: 10px;
 
-        <div
-            class="modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="tituloModal"
-        >
+    letter-spacing: 2px;
+}
 
 
-            <!-- CABECERA MODAL -->
 
-            <div class="modal-cabecera">
+/* CONTADOR */
 
-                <div>
+.contador {
 
-                    <h2 id="tituloModal">
-                        NUEVO ENLACE
-                    </h2>
+    display: flex;
 
-                    <span>
-                        Añadir enlace local
-                    </span>
+    flex-direction: column;
 
-                </div>
+    align-items: flex-end;
+}
 
 
-                <button
-                    type="button"
-                    id="cerrarModal"
-                    class="modal-cerrar"
-                    title="Cerrar"
-                >
-                    ×
-                </button>
+.contador span {
 
-            </div>
+    font-size: 25px;
 
+    font-weight: 800;
 
+    line-height: 1;
 
-            <!-- FORMULARIO -->
+    color: var(--acento);
+}
 
-            <form
-                id="formNuevoEnlace"
-                class="formulario"
-                autocomplete="off"
-            >
 
+.contador small {
 
-                <!-- NOMBRE -->
+    margin-top: 4px;
 
-                <div class="campo">
+    color: var(--texto-secundario);
 
-                    <label for="nombreNuevo">
-                        NOMBRE
-                    </label>
+    font-size: 9px;
 
-                    <input
-                        type="text"
-                        id="nombreNuevo"
-                        placeholder="Ej. Canal HD"
-                        maxlength="100"
-                    >
+    letter-spacing: 1.5px;
+}
 
-                </div>
 
 
+/* =========================================================
+   CONTENEDOR
+   ========================================================= */
 
-                <!-- ID -->
+.contenedor {
 
-                <div class="campo">
+    width:
+        min(1200px, calc(100% - 30px));
 
-                    <label for="idNuevo">
-                        ID_ACES_STREAM
-                    </label>
+    margin: 0 auto;
 
-                    <input
-                        type="text"
-                        id="idNuevo"
-                        placeholder="Introduce el ID de Ace Stream"
-                        maxlength="100"
-                        required
-                    >
+    padding:
+        28px 0 45px;
+}
 
-                    <small>
-                        La URL se genera automáticamente.
-                    </small>
 
-                </div>
 
+/* =========================================================
+   HERRAMIENTAS
+   ========================================================= */
 
+.herramientas {
 
-                <!-- NOTA -->
+    display: flex;
 
-                <div class="campo">
+    gap: 10px;
 
-                    <label for="notaNuevo">
-                        NOTA / ORDEN
-                    </label>
+    margin-bottom: 24px;
+}
 
-                    <input
-                        type="number"
-                        id="notaNuevo"
-                        placeholder="Ej. 10"
-                        min="0"
-                        max="999"
-                        step="1"
-                        value="0"
-                        required
-                    >
 
-                    <small>
-                        Los enlaces se ordenan de mayor a menor nota.
-                    </small>
+.buscador {
 
-                </div>
+    flex: 1;
 
+    position: relative;
 
+    display: flex;
 
-                <!-- URL -->
+    align-items: center;
+}
 
-                <div class="campo">
 
-                    <label>
-                        URL GENERADA
-                    </label>
+.icono-busqueda {
 
-                    <div
-                        id="urlPrevisualizacion"
-                        class="url-previsualizacion"
-                    >
-                        acestream://
-                    </div>
+    position: absolute;
 
-                </div>
+    left: 16px;
 
+    color: var(--texto-secundario);
 
+    font-size: 23px;
 
-                <!-- ERROR DEL FORMULARIO -->
+    pointer-events: none;
+}
 
-                <div
-                    id="errorFormulario"
-                    class="error-formulario"
-                ></div>
 
+.buscador input {
 
+    width: 100%;
 
-                <!-- BOTONES -->
+    height: 50px;
 
-                <div class="modal-botones">
+    padding:
+        0 45px;
 
-                    <button
-                        type="button"
-                        id="cancelarNuevo"
-                        class="boton-cancelar"
-                    >
-                        CANCELAR
-                    </button>
+    border:
+        1px solid var(--borde);
 
+    border-radius: 10px;
 
-                    <button
-                        type="submit"
-                        class="boton-crear"
-                    >
-                        ✓ CREAR ENLACE
-                    </button>
+    outline: none;
 
-                </div>
+    background: var(--tarjeta);
 
+    color: var(--texto);
 
-            </form>
+    font-size: 14px;
 
-        </div>
+    transition:
+        border-color 0.2s,
+        box-shadow 0.2s;
+}
 
-    </div>
 
+.buscador input::placeholder {
 
+    color: #65717e;
+}
 
-    <!-- =====================================================
-         PIE
-         ===================================================== -->
 
-    <footer class="pie">
+.buscador input:focus {
 
-        <span>
-            GESTOR DE ENLACES
-        </span>
+    border-color:
+        var(--acento);
 
-        <span class="separador">
-            •
-        </span>
+    box-shadow:
+        0 0 0 3px
+        rgba(255, 59, 48, 0.1);
+}
 
-        <span id="estadoConexion">
-            Cargando...
-        </span>
 
-        <span class="version">
-            V2.1
-        </span>
+.boton-limpiar {
 
-    </footer>
+    position: absolute;
 
+    right: 10px;
 
+    border: 0;
 
-    <!-- =====================================================
-         JAVASCRIPT
-         ===================================================== -->
+    background: transparent;
 
-    <script src="app.js?v=2.1"></script>
+    color: var(--texto-secundario);
 
-</body>
+    font-size: 23px;
 
-</html>
+    cursor: pointer;
+
+    display: none;
+}
+
+
+
+/* BOTON NUEVO */
+
+.boton-nuevo {
+
+    height: 50px;
+
+    padding:
+        0 17px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    border: 0;
+
+    border-radius: 10px;
+
+    background:
+        var(--acento);
+
+    color: white;
+
+    cursor: pointer;
+
+    font-weight: 800;
+
+    font-size: 11px;
+
+    letter-spacing: 0.5px;
+
+    white-space: nowrap;
+
+    transition:
+        background 0.2s,
+        transform 0.1s;
+}
+
+
+.boton-nuevo:hover {
+
+    background:
+        var(--acento-hover);
+}
+
+
+.boton-nuevo:active {
+
+    transform:
+        scale(0.98);
+}
+
+
+.boton-nuevo-icono {
+
+    font-size: 20px;
+
+    line-height: 1;
+}
+
+
+
+/* RECARGAR */
+
+.boton-recargar {
+
+    height: 50px;
+
+    padding:
+        0 17px;
+
+    border:
+        1px solid var(--borde);
+
+    border-radius: 10px;
+
+    background:
+        var(--tarjeta);
+
+    color:
+        var(--texto);
+
+    cursor: pointer;
+
+    font-weight: 700;
+
+    font-size: 12px;
+
+    letter-spacing: 0.5px;
+
+    white-space: nowrap;
+
+    transition:
+        background 0.2s,
+        border-color 0.2s;
+}
+
+
+.boton-recargar:hover {
+
+    background:
+        var(--tarjeta-hover);
+
+    border-color:
+        var(--acento);
+}
+
+
+
+/* =========================================================
+   LISTADO
+   ========================================================= */
+
+.lista-enlaces {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(310px, 1fr)
+        );
+
+    gap: 16px;
+}
+
+
+
+/* =========================================================
+   TARJETA
+   ========================================================= */
+
+.tarjeta {
+
+    position: relative;
+
+    background:
+        linear-gradient(
+            145deg,
+            #141b23,
+            #10161d
+        );
+
+    border:
+        1px solid var(--borde);
+
+    border-radius:
+        var(--radio);
+
+    padding: 20px;
+
+    box-shadow:
+        var(--sombra);
+
+    overflow: hidden;
+
+    transition:
+        transform 0.2s,
+        border-color 0.2s,
+        background 0.2s;
+}
+
+
+.tarjeta::before {
+
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+
+    top: 0;
+
+    width: 4px;
+
+    height: 100%;
+
+    background:
+        var(--acento);
+
+    opacity: 0.85;
+}
+
+
+.tarjeta.local::before {
+
+    background:
+        var(--verde);
+}
+
+
+.tarjeta:hover {
+
+    transform:
+        translateY(-3px);
+
+    border-color:
+        #3b4856;
+
+    background:
+        var(--tarjeta-hover);
+}
+
+
+
+/* CABECERA TARJETA */
+
+.tarjeta-cabecera {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: flex-start;
+
+    gap: 10px;
+
+    margin-bottom: 15px;
+}
+
+
+.nombre {
+
+    margin: 0;
+
+    font-size: 18px;
+
+    font-weight: 800;
+
+    line-height: 1.25;
+
+    word-break: break-word;
+}
+
+
+
+/* INDICADOR LOCAL */
+
+.indicador-local {
+
+    display: inline-flex;
+
+    align-items: center;
+
+    margin-top: 7px;
+
+    padding:
+        3px 7px;
+
+    border-radius: 5px;
+
+    background:
+        rgba(53, 208, 127, 0.1);
+
+    border:
+        1px solid rgba(53, 208, 127, 0.25);
+
+    color:
+        var(--verde);
+
+    font-size: 7px;
+
+    font-weight: 800;
+
+    letter-spacing: 1px;
+}
+
+
+
+/* NOTA */
+
+.nota {
+
+    flex-shrink: 0;
+
+    min-width: 48px;
+
+    height: 40px;
+
+    padding:
+        0 8px;
+
+    display: flex;
+
+    flex-direction: column;
+
+    align-items: center;
+
+    justify-content: center;
+
+    background:
+        rgba(255, 59, 48, 0.1);
+
+    border:
+        1px solid rgba(255, 59, 48, 0.35);
+
+    border-radius: 8px;
+}
+
+
+.nota-numero {
+
+    color:
+        var(--acento);
+
+    font-size: 17px;
+
+    font-weight: 800;
+
+    line-height: 1;
+}
+
+
+.nota-texto {
+
+    margin-top: 3px;
+
+    color:
+        var(--texto-secundario);
+
+    font-size: 7px;
+
+    letter-spacing: 1px;
+}
+
+
+
+/* =========================================================
+   INFORMACION
+   ========================================================= */
+
+.informacion {
+
+    margin-bottom: 18px;
+}
+
+
+.info-linea {
+
+    display: flex;
+
+    flex-direction: column;
+
+    gap: 5px;
+
+    margin-bottom: 10px;
+}
+
+
+.info-label {
+
+    color:
+        var(--texto-secundario);
+
+    font-size: 9px;
+
+    font-weight: 700;
+
+    letter-spacing: 1px;
+
+    text-transform: uppercase;
+}
+
+
+.info-valor {
+
+    padding:
+        8px 10px;
+
+    background:
+        rgba(0, 0, 0, 0.25);
+
+    border:
+        1px solid rgba(255,255,255,0.04);
+
+    border-radius: 6px;
+
+    color:
+        #bdc6cf;
+
+    font-family:
+        Consolas,
+        monospace;
+
+    font-size: 11px;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+
+    user-select: text;
+}
+
+
+
+/* =========================================================
+   BOTONES TARJETA
+   ========================================================= */
+
+.botones {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr auto auto;
+
+    gap: 8px;
+}
+
+
+.boton-reproducir {
+
+    min-height: 44px;
+
+    border: 0;
+
+    border-radius: 8px;
+
+    background:
+        var(--acento);
+
+    color: white;
+
+    cursor: pointer;
+
+    font-weight: 800;
+
+    font-size: 12px;
+
+    letter-spacing: 0.7px;
+
+    transition:
+        background 0.2s,
+        transform 0.1s;
+}
+
+
+.boton-reproducir:hover {
+
+    background:
+        var(--acento-hover);
+}
+
+
+.boton-reproducir:active {
+
+    transform:
+        scale(0.98);
+}
+
+
+.boton-copiar {
+
+    min-width: 50px;
+
+    min-height: 44px;
+
+    border:
+        1px solid var(--borde);
+
+    border-radius: 8px;
+
+    background:
+        #171e26;
+
+    color:
+        var(--texto);
+
+    cursor: pointer;
+
+    font-size: 17px;
+
+    transition:
+        background 0.2s,
+        border-color 0.2s;
+}
+
+
+.boton-copiar:hover {
+
+    background:
+        #202a34;
+
+    border-color:
+        #4a5866;
+}
+
+
+
+/* BORRAR */
+
+.boton-borrar {
+
+    min-width: 50px;
+
+    min-height: 44px;
+
+    border:
+        1px solid rgba(255, 59, 48, 0.25);
+
+    border-radius: 8px;
+
+    background:
+        rgba(255, 59, 48, 0.06);
+
+    color:
+        #ff7770;
+
+    cursor: pointer;
+
+    font-size: 16px;
+
+    transition:
+        background 0.2s,
+        border-color 0.2s,
+        color 0.2s;
+}
+
+
+.boton-borrar:hover {
+
+    background:
+        rgba(255, 59, 48, 0.18);
+
+    border-color:
+        rgba(255, 59, 48, 0.6);
+
+    color:
+        white;
+}
+
+
+
+/* =========================================================
+   MENSAJES
+   ========================================================= */
+
+.mensaje {
+
+    display: none;
+
+    padding:
+        13px 16px;
+
+    margin-bottom: 18px;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+
+    text-align: center;
+}
+
+
+.mensaje.visible {
+
+    display: block;
+}
+
+
+.mensaje.error {
+
+    background:
+        rgba(255, 59, 48, 0.1);
+
+    border:
+        1px solid rgba(255, 59, 48, 0.3);
+
+    color:
+        #ff817a;
+}
+
+
+.mensaje.ok {
+
+    background:
+        rgba(53, 208, 127, 0.1);
+
+    border:
+        1px solid rgba(53, 208, 127, 0.3);
+
+    color:
+        var(--verde);
+}
+
+
+
+/* =========================================================
+   SIN RESULTADOS
+   ========================================================= */
+
+.sin-resultados {
+
+    text-align: center;
+
+    padding:
+        70px 20px;
+
+    color:
+        var(--texto-secundario);
+}
+
+
+.sin-resultados-icono {
+
+    font-size: 50px;
+
+    opacity: 0.5;
+
+    margin-bottom: 10px;
+}
+
+
+.sin-resultados h2 {
+
+    margin:
+        0 0 8px;
+
+    color:
+        var(--texto);
+
+    font-size: 18px;
+}
+
+
+.sin-resultados p {
+
+    margin: 0;
+
+    font-size: 13px;
+}
+
+
+.oculto {
+
+    display: none !important;
+}
+
+
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+.modal-fondo {
+
+    position: fixed;
+
+    inset: 0;
+
+    z-index: 1000;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 20px;
+
+    background:
+        rgba(0, 0, 0, 0.78);
+
+    backdrop-filter:
+        blur(7px);
+}
+
+
+.modal {
+
+    width:
+        min(500px, 100%);
+
+    max-height:
+        calc(100vh - 40px);
+
+    overflow-y:
+        auto;
+
+    background:
+        linear-gradient(
+            145deg,
+            #151c24,
+            #0e141a
+        );
+
+    border:
+        1px solid #303c48;
+
+    border-radius:
+        14px;
+
+    box-shadow:
+        0 25px 80px rgba(0, 0, 0, 0.6);
+}
+
+
+
+/* CABECERA MODAL */
+
+.modal-cabecera {
+
+    display: flex;
+
+    align-items: flex-start;
+
+    justify-content: space-between;
+
+    padding:
+        22px;
+
+    border-bottom:
+        1px solid var(--borde);
+}
+
+
+.modal-cabecera h2 {
+
+    margin: 0;
+
+    font-size: 18px;
+
+    letter-spacing: 1px;
+}
+
+
+.modal-cabecera span {
+
+    display: block;
+
+    margin-top: 5px;
+
+    color:
+        var(--texto-secundario);
+
+    font-size: 11px;
+}
+
+
+.modal-cerrar {
+
+    width: 34px;
+
+    height: 34px;
+
+    border: 0;
+
+    border-radius: 7px;
+
+    background:
+        #202831;
+
+    color:
+        var(--texto-secundario);
+
+    cursor: pointer;
+
+    font-size: 22px;
+
+    line-height: 1;
+}
+
+
+.modal-cerrar:hover {
+
+    background:
+        var(--acento);
+
+    color: white;
+}
+
+
+
+/* =========================================================
+   FORMULARIO
+   ========================================================= */
+
+.formulario {
+
+    padding: 22px;
+}
+
+
+.campo {
+
+    margin-bottom: 18px;
+}
+
+
+.campo label {
+
+    display: block;
+
+    margin-bottom: 7px;
+
+    color:
+        var(--texto-secundario);
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    letter-spacing: 1.2px;
+}
+
+
+.campo input {
+
+    width: 100%;
+
+    height: 46px;
+
+    padding:
+        0 12px;
+
+    border:
+        1px solid var(--borde);
+
+    border-radius: 8px;
+
+    outline: none;
+
+    background:
+        #0b1015;
+
+    color:
+        var(--texto);
+
+    font-family:
+        Arial,
+        Helvetica,
+        sans-serif;
+
+    font-size: 14px;
+}
+
+
+.campo input:focus {
+
+    border-color:
+        var(--acento);
+
+    box-shadow:
+        0 0 0 3px
+        rgba(255, 59, 48, 0.08);
+}
+
+
+.campo small {
+
+    display: block;
+
+    margin-top: 6px;
+
+    color:
+        #697583;
+
+    font-size: 10px;
+}
+
+
+
+/* URL */
+
+.url-previsualizacion {
+
+    min-height: 44px;
+
+    display: flex;
+
+    align-items: center;
+
+    padding:
+        0 12px;
+
+    border:
+        1px solid rgba(53, 208, 127, 0.25);
+
+    border-radius: 8px;
+
+    background:
+        rgba(53, 208, 127, 0.05);
+
+    color:
+        var(--verde);
+
+    font-family:
+        Consolas,
+        monospace;
+
+    font-size: 11px;
+
+    word-break: break-all;
+}
+
+
+
+/* ERROR FORMULARIO */
+
+.error-formulario {
+
+    display: none;
+
+    margin:
+        -4px 0 15px;
+
+    padding:
+        10px 12px;
+
+    border:
+        1px solid rgba(255, 59, 48, 0.3);
+
+    border-radius: 7px;
+
+    background:
+        rgba(255, 59, 48, 0.08);
+
+    color:
+        #ff817a;
+
+    font-size: 12px;
+
+    line-height: 1.4;
+}
+
+
+.error-formulario.visible {
+
+    display: block;
+}
+
+
+
+/* =========================================================
+   BOTONES MODAL
+   ========================================================= */
+
+.modal-botones {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1.5fr;
+
+    gap: 9px;
+
+    margin-top: 24px;
+}
+
+
+.boton-cancelar,
+.boton-crear {
+
+    min-height: 46px;
+
+    border-radius: 8px;
+
+    cursor: pointer;
+
+    font-size: 11px;
+
+    font-weight: 800;
+
+    letter-spacing: 0.6px;
+}
+
+
+.boton-cancelar {
+
+    border:
+        1px solid var(--borde);
+
+    background:
+        #171e26;
+
+    color:
+        var(--texto-secundario);
+}
+
+
+.boton-cancelar:hover {
+
+    background:
+        #202a34;
+
+    color:
+        var(--texto);
+}
+
+
+.boton-crear {
+
+    border: 0;
+
+    background:
+        var(--acento);
+
+    color: white;
+}
+
+
+.boton-crear:hover {
+
+    background:
+        var(--acento-hover);
+}
+
+
+
+/* =========================================================
+   PIE
+   ========================================================= */
+
+.pie {
+
+    min-height: 45px;
+
+    display: flex;
+
+    justify-content: center;
+
+    align-items: center;
+
+    gap: 10px;
+
+    padding:
+        10px;
+
+    color:
+        #596572;
+
+    font-size: 9px;
+
+    letter-spacing: 1.2px;
+
+    border-top:
+        1px solid var(--borde);
+}
+
+
+.separador {
+
+    color:
+        var(--acento);
+}
+
+
+#estadoConexion {
+
+    color:
+        #667381;
+}
+
+
+.version {
+
+    color:
+        #46515c;
+
+    font-size: 8px;
+}
+
+
+
+/* =========================================================
+   CARGANDO
+   ========================================================= */
+
+.cargando {
+
+    width: 100%;
+
+    padding: 60px;
+
+    text-align: center;
+
+    color:
+        var(--texto-secundario);
+
+    font-size: 13px;
+}
+
+
+.cargando::after {
+
+    content: "";
+
+    display: block;
+
+    width: 24px;
+
+    height: 24px;
+
+    margin:
+        15px auto 0;
+
+    border:
+        3px solid #2b3540;
+
+    border-top-color:
+        var(--acento);
+
+    border-radius: 50%;
+
+    animation:
+        girar 0.8s linear infinite;
+}
+
+
+@keyframes girar {
+
+    to {
+
+        transform:
+            rotate(360deg);
+
+    }
+
+}
+
+
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 800px) {
+
+    .herramientas {
+
+        flex-wrap: wrap;
+    }
+
+
+    .buscador {
+
+        flex-basis: 100%;
+    }
+
+
+    .boton-nuevo,
+    .boton-recargar {
+
+        flex: 1;
+    }
+
+}
+
+
+
+@media (max-width: 650px) {
+
+    .cabecera {
+
+        height: 70px;
+
+        padding:
+            0 15px;
+    }
+
+
+    .logo-icon {
+
+        width: 36px;
+
+        height: 36px;
+
+        font-size: 17px;
+    }
+
+
+    .logo-area h1 {
+
+        font-size: 16px;
+
+        letter-spacing: 1.5px;
+    }
+
+
+    .logo-area span {
+
+        font-size: 8px;
+    }
+
+
+    .contador span {
+
+        font-size: 20px;
+    }
+
+
+    .contenedor {
+
+        width:
+            calc(100% - 20px);
+
+        padding-top: 18px;
+    }
+
+
+    .lista-enlaces {
+
+        grid-template-columns:
+            1fr;
+
+        gap: 12px;
+    }
+
+
+    .tarjeta {
+
+        padding: 17px;
+    }
+
+
+    .nombre {
+
+        font-size: 17px;
+    }
+
+
+    .botones {
+
+        grid-template-columns:
+            1fr auto auto;
+    }
+
+
+    .modal-fondo {
+
+        align-items:
+            flex-end;
+
+        padding: 0;
+    }
+
+
+    .modal {
+
+        width: 100%;
+
+        max-height:
+            92vh;
+
+        border-radius:
+            16px 16px 0 0;
+    }
+
+
+    .pie {
+
+        font-size: 8px;
+
+        gap: 7px;
+    }
+
+}
+
+
+
+@media (max-width: 400px) {
+
+    .boton-nuevo span:last-child,
+    .boton-recargar span {
+
+        display: none;
+    }
+
+
+    .boton-nuevo,
+    .boton-recargar {
+
+        min-width: 50px;
+    }
+
+}

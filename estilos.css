@@ -1,1537 +1,423 @@
-/* =========================================================
-   GESTOR ACE STREAM - V2
-   ESTILOS
-   ========================================================= */
+<!DOCTYPE html>
+<html lang="es">
 
+<head>
 
-:root {
+    <meta charset="UTF-8">
 
-    --fondo: #080b0f;
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
 
-    --fondo-secundario: #10151b;
+    <meta
+        name="theme-color"
+        content="#080b0f"
+    >
 
-    --tarjeta: #121820;
+    <meta
+        name="description"
+        content="Gestor de enlaces Ace Stream"
+    >
 
-    --tarjeta-hover: #18212b;
+    <title>Gestor Ace Stream</title>
 
-    --borde: #26313d;
+    <link
+        rel="stylesheet"
+        href="estilos.css?v=2.1"
+    >
 
-    --texto: #f1f4f7;
+</head>
 
-    --texto-secundario: #8995a3;
 
-    --acento: #ff3b30;
+<body>
 
-    --acento-hover: #ff554c;
 
-    --verde: #35d07f;
+    <!-- =====================================================
+         CABECERA
+         ===================================================== -->
 
-    --radio: 12px;
+    <header class="cabecera">
 
-    --sombra:
-        0 10px 30px rgba(0, 0, 0, 0.35);
-}
+        <div class="logo-area">
 
+            <div class="logo-icon">
+                ▶
+            </div>
 
+            <div>
 
-/* =========================================================
-   GENERAL
-   ========================================================= */
+                <h1>ACE STREAM</h1>
 
-* {
-    box-sizing: border-box;
-}
+                <span>
+                    GESTOR DE ENLACES
+                </span>
 
+            </div>
 
-html {
-    min-height: 100%;
-}
+        </div>
 
 
-body {
+        <div class="contador">
 
-    margin: 0;
+            <span id="contadorEnlaces">
+                0
+            </span>
 
-    min-height: 100vh;
+            <small>
+                ENLACES
+            </small>
 
-    background:
-        radial-gradient(
-            circle at top right,
-            rgba(255, 59, 48, 0.08),
-            transparent 30%
-        ),
-        linear-gradient(
-            135deg,
-            #080b0f,
-            #0c1117
-        );
+        </div>
 
-    color: var(--texto);
+    </header>
 
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-}
 
 
+    <!-- =====================================================
+         CONTENIDO PRINCIPAL
+         ===================================================== -->
 
-/* =========================================================
-   CABECERA
-   ========================================================= */
+    <main class="contenedor">
 
-.cabecera {
 
-    height: 82px;
+        <!-- =================================================
+             HERRAMIENTAS
+             ================================================= -->
 
-    display: flex;
+        <section class="herramientas">
 
-    align-items: center;
 
-    justify-content: space-between;
+            <div class="buscador">
 
-    padding: 0 30px;
+                <span class="icono-busqueda">
+                    ⌕
+                </span>
 
-    background:
-        rgba(8, 11, 15, 0.96);
+                <input
+                    type="text"
+                    id="buscador"
+                    placeholder="Buscar por nombre, ID o nota..."
+                    autocomplete="off"
+                >
 
-    border-bottom:
-        1px solid var(--borde);
+                <button
+                    type="button"
+                    id="limpiarBusqueda"
+                    class="boton-limpiar"
+                    title="Limpiar búsqueda"
+                >
+                    ×
+                </button>
 
-    position: sticky;
+            </div>
 
-    top: 0;
 
-    z-index: 100;
+            <button
+                type="button"
+                id="nuevoEnlace"
+                class="boton-nuevo"
+            >
 
-    backdrop-filter: blur(10px);
-}
+                <span class="boton-nuevo-icono">
+                    +
+                </span>
 
+                <span>
+                    NUEVO ENLACE
+                </span>
 
-.logo-area {
+            </button>
 
-    display: flex;
 
-    align-items: center;
+            <button
+                type="button"
+                id="recargar"
+                class="boton-recargar"
+                title="Recargar enlaces"
+            >
 
-    gap: 14px;
-}
+                ↻
 
+                <span>
+                    RECARGAR
+                </span>
 
-.logo-icon {
+            </button>
 
-    width: 42px;
 
-    height: 42px;
+        </section>
 
-    display: flex;
 
-    align-items: center;
 
-    justify-content: center;
+        <!-- =================================================
+             MENSAJES
+             ================================================= -->
 
-    background: var(--acento);
+        <div
+            id="mensaje"
+            class="mensaje"
+        ></div>
 
-    color: white;
 
-    font-size: 20px;
 
-    font-weight: bold;
+        <!-- =================================================
+             LISTADO DE ENLACES
+             ================================================= -->
 
-    border-radius: 8px;
+        <section
+            id="listaEnlaces"
+            class="lista-enlaces"
+        ></section>
 
-    box-shadow:
-        0 0 20px rgba(255, 59, 48, 0.25);
-}
 
 
-.logo-area h1 {
+        <!-- =================================================
+             SIN RESULTADOS
+             ================================================= -->
 
-    margin: 0;
+        <section
+            id="sinResultados"
+            class="sin-resultados oculto"
+        >
 
-    font-size: 20px;
+            <div class="sin-resultados-icono">
+                ⌕
+            </div>
 
-    letter-spacing: 2px;
+            <h2>
+                No se encontraron enlaces
+            </h2>
 
-    font-weight: 800;
-}
+            <p>
+                Prueba con otro nombre, ID o nota.
+            </p>
 
+        </section>
 
-.logo-area span {
 
-    display: block;
+    </main>
 
-    margin-top: 3px;
 
-    color: var(--texto-secundario);
 
-    font-size: 10px;
+    <!-- =====================================================
+         MODAL NUEVO ENLACE
+         ===================================================== -->
 
-    letter-spacing: 2px;
-}
+    <div
+        id="modalNuevo"
+        class="modal-fondo oculto"
+        aria-hidden="true"
+    >
 
+        <div
+            class="modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="tituloModal"
+        >
 
 
-.contador {
+            <!-- CABECERA MODAL -->
 
-    display: flex;
+            <div class="modal-cabecera">
 
-    flex-direction: column;
+                <div>
 
-    align-items: flex-end;
-}
+                    <h2 id="tituloModal">
+                        NUEVO ENLACE
+                    </h2>
 
+                    <span>
+                        Añadir enlace local
+                    </span>
 
-.contador span {
+                </div>
 
-    font-size: 25px;
 
-    font-weight: 800;
+                <button
+                    type="button"
+                    id="cerrarModal"
+                    class="modal-cerrar"
+                    title="Cerrar"
+                >
+                    ×
+                </button>
 
-    line-height: 1;
+            </div>
 
-    color: var(--acento);
-}
 
 
-.contador small {
+            <!-- FORMULARIO -->
 
-    margin-top: 4px;
+            <form
+                id="formNuevoEnlace"
+                class="formulario"
+                autocomplete="off"
+            >
 
-    color: var(--texto-secundario);
 
-    font-size: 9px;
+                <!-- NOMBRE -->
 
-    letter-spacing: 1.5px;
-}
+                <div class="campo">
 
+                    <label for="nombreNuevo">
+                        NOMBRE
+                    </label>
 
+                    <input
+                        type="text"
+                        id="nombreNuevo"
+                        placeholder="Ej. Canal HD"
+                        maxlength="100"
+                    >
 
-/* =========================================================
-   CONTENEDOR
-   ========================================================= */
+                </div>
 
-.contenedor {
 
-    width:
-        min(1200px, calc(100% - 30px));
 
-    margin: 0 auto;
+                <!-- ID -->
 
-    padding:
-        28px 0 45px;
-}
+                <div class="campo">
 
+                    <label for="idNuevo">
+                        ID_ACES_STREAM
+                    </label>
 
+                    <input
+                        type="text"
+                        id="idNuevo"
+                        placeholder="Introduce el ID de Ace Stream"
+                        maxlength="100"
+                        required
+                    >
 
-/* =========================================================
-   HERRAMIENTAS
-   ========================================================= */
+                    <small>
+                        La URL se genera automáticamente.
+                    </small>
 
-.herramientas {
+                </div>
 
-    display: flex;
 
-    gap: 10px;
 
-    margin-bottom: 24px;
-}
+                <!-- NOTA -->
 
+                <div class="campo">
 
-.buscador {
+                    <label for="notaNuevo">
+                        NOTA / ORDEN
+                    </label>
 
-    flex: 1;
+                    <input
+                        type="number"
+                        id="notaNuevo"
+                        placeholder="Ej. 10"
+                        min="0"
+                        max="999"
+                        step="1"
+                        value="0"
+                        required
+                    >
 
-    position: relative;
+                    <small>
+                        Los enlaces se ordenan de mayor a menor nota.
+                    </small>
 
-    display: flex;
+                </div>
 
-    align-items: center;
-}
 
 
-.icono-busqueda {
+                <!-- URL -->
 
-    position: absolute;
+                <div class="campo">
 
-    left: 16px;
+                    <label>
+                        URL GENERADA
+                    </label>
 
-    color: var(--texto-secundario);
+                    <div
+                        id="urlPrevisualizacion"
+                        class="url-previsualizacion"
+                    >
+                        acestream://
+                    </div>
 
-    font-size: 23px;
+                </div>
 
-    pointer-events: none;
-}
 
 
-.buscador input {
+                <!-- ERROR DEL FORMULARIO -->
 
-    width: 100%;
+                <div
+                    id="errorFormulario"
+                    class="error-formulario"
+                ></div>
 
-    height: 50px;
 
-    padding:
-        0 45px;
 
-    border:
-        1px solid var(--borde);
+                <!-- BOTONES -->
 
-    border-radius: 10px;
+                <div class="modal-botones">
 
-    outline: none;
+                    <button
+                        type="button"
+                        id="cancelarNuevo"
+                        class="boton-cancelar"
+                    >
+                        CANCELAR
+                    </button>
 
-    background: var(--tarjeta);
 
-    color: var(--texto);
+                    <button
+                        type="submit"
+                        class="boton-crear"
+                    >
+                        ✓ CREAR ENLACE
+                    </button>
 
-    font-size: 14px;
+                </div>
 
-    transition:
-        border-color 0.2s,
-        box-shadow 0.2s;
-}
 
+            </form>
 
-.buscador input::placeholder {
+        </div>
 
-    color: #65717e;
-}
+    </div>
 
 
-.buscador input:focus {
 
-    border-color:
-        var(--acento);
+    <!-- =====================================================
+         PIE
+         ===================================================== -->
 
-    box-shadow:
-        0 0 0 3px
-        rgba(255, 59, 48, 0.1);
-}
+    <footer class="pie">
 
+        <span>
+            GESTOR DE ENLACES
+        </span>
 
-.boton-limpiar {
+        <span class="separador">
+            •
+        </span>
 
-    position: absolute;
+        <span id="estadoConexion">
+            Cargando...
+        </span>
 
-    right: 10px;
+        <span class="version">
+            V2.1
+        </span>
 
-    border: 0;
+    </footer>
 
-    background: transparent;
 
-    color: var(--texto-secundario);
 
-    font-size: 23px;
+    <!-- =====================================================
+         JAVASCRIPT
+         ===================================================== -->
 
-    cursor: pointer;
+    <script src="app.js?v=2.1"></script>
 
-    display: none;
-}
+</body>
 
-
-
-/* BOTON NUEVO */
-
-.boton-nuevo {
-
-    height: 50px;
-
-    padding:
-        0 17px;
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 7px;
-
-    border: 0;
-
-    border-radius: 10px;
-
-    background:
-        var(--acento);
-
-    color: white;
-
-    cursor: pointer;
-
-    font-weight: 800;
-
-    font-size: 11px;
-
-    letter-spacing: 0.5px;
-
-    white-space: nowrap;
-
-    transition:
-        background 0.2s,
-        transform 0.1s;
-}
-
-
-.boton-nuevo:hover {
-
-    background:
-        var(--acento-hover);
-}
-
-
-.boton-nuevo:active {
-
-    transform:
-        scale(0.98);
-}
-
-
-.boton-nuevo-icono {
-
-    font-size: 20px;
-
-    line-height: 1;
-}
-
-
-
-/* BOTON RECARGAR */
-
-.boton-recargar {
-
-    height: 50px;
-
-    padding:
-        0 17px;
-
-    border:
-        1px solid var(--borde);
-
-    border-radius: 10px;
-
-    background: var(--tarjeta);
-
-    color: var(--texto);
-
-    cursor: pointer;
-
-    font-weight: 700;
-
-    font-size: 12px;
-
-    letter-spacing: 0.5px;
-
-    white-space: nowrap;
-
-    transition:
-        background 0.2s,
-        border-color 0.2s;
-}
-
-
-.boton-recargar:hover {
-
-    background:
-        var(--tarjeta-hover);
-
-    border-color:
-        var(--acento);
-}
-
-
-
-/* =========================================================
-   LISTADO
-   ========================================================= */
-
-.lista-enlaces {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(auto-fill, minmax(310px, 1fr));
-
-    gap: 16px;
-}
-
-
-
-/* =========================================================
-   TARJETA
-   ========================================================= */
-
-.tarjeta {
-
-    position: relative;
-
-    background:
-        linear-gradient(
-            145deg,
-            #141b23,
-            #10161d
-        );
-
-    border:
-        1px solid var(--borde);
-
-    border-radius:
-        var(--radio);
-
-    padding: 20px;
-
-    box-shadow:
-        var(--sombra);
-
-    overflow: hidden;
-
-    transition:
-        transform 0.2s,
-        border-color 0.2s,
-        background 0.2s;
-}
-
-
-.tarjeta::before {
-
-    content: "";
-
-    position: absolute;
-
-    left: 0;
-
-    top: 0;
-
-    width: 4px;
-
-    height: 100%;
-
-    background:
-        var(--acento);
-
-    opacity: 0.85;
-}
-
-
-.tarjeta.local::before {
-
-    background:
-        var(--verde);
-}
-
-
-.tarjeta:hover {
-
-    transform:
-        translateY(-3px);
-
-    border-color:
-        #3b4856;
-
-    background:
-        var(--tarjeta-hover);
-}
-
-
-
-/* CABECERA TARJETA */
-
-.tarjeta-cabecera {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: flex-start;
-
-    gap: 10px;
-
-    margin-bottom: 15px;
-}
-
-
-.nombre {
-
-    margin: 0;
-
-    font-size: 18px;
-
-    font-weight: 800;
-
-    line-height: 1.25;
-
-    word-break: break-word;
-}
-
-
-
-/* INDICADOR LOCAL */
-
-.indicador-local {
-
-    display: inline-flex;
-
-    align-items: center;
-
-    margin-top: 7px;
-
-    padding:
-        3px 7px;
-
-    border-radius: 5px;
-
-    background:
-        rgba(53, 208, 127, 0.1);
-
-    border:
-        1px solid rgba(53, 208, 127, 0.25);
-
-    color:
-        var(--verde);
-
-    font-size: 7px;
-
-    font-weight: 800;
-
-    letter-spacing: 1px;
-}
-
-
-
-/* NOTA */
-
-.nota {
-
-    flex-shrink: 0;
-
-    min-width: 48px;
-
-    height: 40px;
-
-    padding:
-        0 8px;
-
-    display: flex;
-
-    flex-direction: column;
-
-    align-items: center;
-
-    justify-content: center;
-
-    background:
-        rgba(255, 59, 48, 0.1);
-
-    border:
-        1px solid rgba(255, 59, 48, 0.35);
-
-    border-radius: 8px;
-}
-
-
-.nota-numero {
-
-    color:
-        var(--acento);
-
-    font-size: 17px;
-
-    font-weight: 800;
-
-    line-height: 1;
-}
-
-
-.nota-texto {
-
-    margin-top: 3px;
-
-    color:
-        var(--texto-secundario);
-
-    font-size: 7px;
-
-    letter-spacing: 1px;
-}
-
-
-
-/* =========================================================
-   INFORMACION
-   ========================================================= */
-
-.informacion {
-
-    margin-bottom: 18px;
-}
-
-
-.info-linea {
-
-    display: flex;
-
-    flex-direction: column;
-
-    gap: 5px;
-
-    margin-bottom: 10px;
-}
-
-
-.info-label {
-
-    color:
-        var(--texto-secundario);
-
-    font-size: 9px;
-
-    font-weight: 700;
-
-    letter-spacing: 1px;
-
-    text-transform: uppercase;
-}
-
-
-.info-valor {
-
-    padding:
-        8px 10px;
-
-    background:
-        rgba(0, 0, 0, 0.25);
-
-    border:
-        1px solid rgba(255,255,255,0.04);
-
-    border-radius: 6px;
-
-    color:
-        #bdc6cf;
-
-    font-family:
-        Consolas,
-        monospace;
-
-    font-size: 11px;
-
-    overflow: hidden;
-
-    text-overflow: ellipsis;
-
-    white-space: nowrap;
-
-    user-select: text;
-}
-
-
-
-/* =========================================================
-   BOTONES TARJETA
-   ========================================================= */
-
-.botones {
-
-    display: grid;
-
-    grid-template-columns:
-        1fr auto;
-
-    gap: 8px;
-}
-
-
-.boton-reproducir {
-
-    min-height: 44px;
-
-    border: 0;
-
-    border-radius: 8px;
-
-    background:
-        var(--acento);
-
-    color: white;
-
-    cursor: pointer;
-
-    font-weight: 800;
-
-    font-size: 12px;
-
-    letter-spacing: 0.7px;
-
-    transition:
-        background 0.2s,
-        transform 0.1s;
-}
-
-
-.boton-reproducir:hover {
-
-    background:
-        var(--acento-hover);
-}
-
-
-.boton-reproducir:active {
-
-    transform:
-        scale(0.98);
-}
-
-
-.boton-copiar {
-
-    min-width: 50px;
-
-    min-height: 44px;
-
-    border:
-        1px solid var(--borde);
-
-    border-radius: 8px;
-
-    background:
-        #171e26;
-
-    color:
-        var(--texto);
-
-    cursor: pointer;
-
-    font-size: 17px;
-
-    transition:
-        background 0.2s,
-        border-color 0.2s;
-}
-
-
-.boton-copiar:hover {
-
-    background:
-        #202a34;
-
-    border-color:
-        #4a5866;
-}
-
-
-
-/* =========================================================
-   MENSAJES
-   ========================================================= */
-
-.mensaje {
-
-    display: none;
-
-    padding:
-        13px 16px;
-
-    margin-bottom: 18px;
-
-    border-radius: 8px;
-
-    font-size: 13px;
-
-    text-align: center;
-}
-
-
-.mensaje.visible {
-
-    display: block;
-}
-
-
-.mensaje.error {
-
-    background:
-        rgba(255, 59, 48, 0.1);
-
-    border:
-        1px solid rgba(255, 59, 48, 0.3);
-
-    color:
-        #ff817a;
-}
-
-
-.mensaje.ok {
-
-    background:
-        rgba(53, 208, 127, 0.1);
-
-    border:
-        1px solid rgba(53, 208, 127, 0.3);
-
-    color:
-        var(--verde);
-}
-
-
-
-/* =========================================================
-   SIN RESULTADOS
-   ========================================================= */
-
-.sin-resultados {
-
-    text-align: center;
-
-    padding:
-        70px 20px;
-
-    color:
-        var(--texto-secundario);
-}
-
-
-.sin-resultados-icono {
-
-    font-size: 50px;
-
-    opacity: 0.5;
-
-    margin-bottom: 10px;
-}
-
-
-.sin-resultados h2 {
-
-    margin:
-        0 0 8px;
-
-    color:
-        var(--texto);
-
-    font-size: 18px;
-}
-
-
-.sin-resultados p {
-
-    margin: 0;
-
-    font-size: 13px;
-}
-
-
-.oculto {
-
-    display: none !important;
-}
-
-
-
-/* =========================================================
-   MODAL
-   ========================================================= */
-
-.modal-fondo {
-
-    position: fixed;
-
-    inset: 0;
-
-    z-index: 1000;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
-
-    padding: 20px;
-
-    background:
-        rgba(0, 0, 0, 0.75);
-
-    backdrop-filter:
-        blur(7px);
-}
-
-
-.modal {
-
-    width:
-        min(500px, 100%);
-
-    max-height:
-        calc(100vh - 40px);
-
-    overflow-y:
-        auto;
-
-    background:
-        linear-gradient(
-            145deg,
-            #151c24,
-            #0e141a
-        );
-
-    border:
-        1px solid #303c48;
-
-    border-radius:
-        14px;
-
-    box-shadow:
-        0 25px 80px rgba(0, 0, 0, 0.6);
-}
-
-
-
-/* MODAL CABECERA */
-
-.modal-cabecera {
-
-    display: flex;
-
-    align-items: flex-start;
-
-    justify-content: space-between;
-
-    padding:
-        22px 22px 18px;
-
-    border-bottom:
-        1px solid var(--borde);
-}
-
-
-.modal-cabecera h2 {
-
-    margin: 0;
-
-    font-size: 18px;
-
-    letter-spacing: 1px;
-}
-
-
-.modal-cabecera span {
-
-    display: block;
-
-    margin-top: 5px;
-
-    color:
-        var(--texto-secundario);
-
-    font-size: 11px;
-}
-
-
-.modal-cerrar {
-
-    width: 34px;
-
-    height: 34px;
-
-    border: 0;
-
-    border-radius: 7px;
-
-    background:
-        #202831;
-
-    color:
-        var(--texto-secundario);
-
-    cursor: pointer;
-
-    font-size: 22px;
-
-    line-height: 1;
-}
-
-
-.modal-cerrar:hover {
-
-    background:
-        var(--acento);
-
-    color: white;
-}
-
-
-
-/* =========================================================
-   FORMULARIO
-   ========================================================= */
-
-.formulario {
-
-    padding: 22px;
-}
-
-
-.campo {
-
-    margin-bottom: 18px;
-}
-
-
-.campo label {
-
-    display: block;
-
-    margin-bottom: 7px;
-
-    color:
-        var(--texto-secundario);
-
-    font-size: 10px;
-
-    font-weight: 800;
-
-    letter-spacing: 1.2px;
-}
-
-
-.campo input {
-
-    width: 100%;
-
-    height: 46px;
-
-    padding:
-        0 12px;
-
-    border:
-        1px solid var(--borde);
-
-    border-radius: 8px;
-
-    outline: none;
-
-    background:
-        #0b1015;
-
-    color:
-        var(--texto);
-
-    font-family:
-        Arial,
-        Helvetica,
-        sans-serif;
-
-    font-size: 14px;
-}
-
-
-.campo input:focus {
-
-    border-color:
-        var(--acento);
-
-    box-shadow:
-        0 0 0 3px
-        rgba(255, 59, 48, 0.08);
-}
-
-
-.campo small {
-
-    display: block;
-
-    margin-top: 6px;
-
-    color:
-        #697583;
-
-    font-size: 10px;
-}
-
-
-
-/* URL PREVISUALIZACION */
-
-.url-previsualizacion {
-
-    min-height: 44px;
-
-    display: flex;
-
-    align-items: center;
-
-    padding:
-        0 12px;
-
-    border:
-        1px solid rgba(53, 208, 127, 0.25);
-
-    border-radius: 8px;
-
-    background:
-        rgba(53, 208, 127, 0.05);
-
-    color:
-        var(--verde);
-
-    font-family:
-        Consolas,
-        monospace;
-
-    font-size: 11px;
-
-    word-break: break-all;
-}
-
-
-
-/* =========================================================
-   BOTONES MODAL
-   ========================================================= */
-
-.modal-botones {
-
-    display: grid;
-
-    grid-template-columns:
-        1fr 1.5fr;
-
-    gap: 9px;
-
-    margin-top: 24px;
-}
-
-
-.boton-cancelar,
-.boton-crear {
-
-    min-height: 46px;
-
-    border-radius: 8px;
-
-    cursor: pointer;
-
-    font-size: 11px;
-
-    font-weight: 800;
-
-    letter-spacing: 0.6px;
-}
-
-
-.boton-cancelar {
-
-    border:
-        1px solid var(--borde);
-
-    background:
-        #171e26;
-
-    color:
-        var(--texto-secundario);
-}
-
-
-.boton-cancelar:hover {
-
-    background:
-        #202a34;
-
-    color:
-        var(--texto);
-}
-
-
-.boton-crear {
-
-    border: 0;
-
-    background:
-        var(--acento);
-
-    color: white;
-}
-
-
-.boton-crear:hover {
-
-    background:
-        var(--acento-hover);
-}
-
-
-
-/* =========================================================
-   PIE
-   ========================================================= */
-
-.pie {
-
-    min-height: 45px;
-
-    display: flex;
-
-    justify-content: center;
-
-    align-items: center;
-
-    gap: 10px;
-
-    padding:
-        10px;
-
-    color:
-        #596572;
-
-    font-size: 9px;
-
-    letter-spacing: 1.2px;
-
-    border-top:
-        1px solid var(--borde);
-}
-
-
-.separador {
-
-    color:
-        var(--acento);
-}
-
-
-#estadoConexion {
-
-    color:
-        #667381;
-}
-
-
-
-/* =========================================================
-   CARGANDO
-   ========================================================= */
-
-.cargando {
-
-    width: 100%;
-
-    padding: 60px;
-
-    text-align: center;
-
-    color:
-        var(--texto-secundario);
-
-    font-size: 13px;
-}
-
-
-.cargando::after {
-
-    content: "";
-
-    display: block;
-
-    width: 24px;
-
-    height: 24px;
-
-    margin:
-        15px auto 0;
-
-    border:
-        3px solid #2b3540;
-
-    border-top-color:
-        var(--acento);
-
-    border-radius: 50%;
-
-    animation:
-        girar 0.8s linear infinite;
-}
-
-
-@keyframes girar {
-
-    to {
-
-        transform:
-            rotate(360deg);
-
-    }
-}
-
-
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
-
-@media (max-width: 800px) {
-
-    .herramientas {
-
-        flex-wrap: wrap;
-    }
-
-
-    .buscador {
-
-        flex-basis: 100%;
-    }
-
-
-    .boton-nuevo,
-    .boton-recargar {
-
-        flex: 1;
-
-        justify-content: center;
-    }
-
-}
-
-
-
-@media (max-width: 650px) {
-
-    .cabecera {
-
-        height: 70px;
-
-        padding:
-            0 15px;
-    }
-
-
-    .logo-icon {
-
-        width: 36px;
-
-        height: 36px;
-
-        font-size: 17px;
-    }
-
-
-    .logo-area h1 {
-
-        font-size: 16px;
-
-        letter-spacing: 1.5px;
-    }
-
-
-    .logo-area span {
-
-        font-size: 8px;
-    }
-
-
-    .contador span {
-
-        font-size: 20px;
-    }
-
-
-    .contenedor {
-
-        width:
-            calc(100% - 20px);
-
-        padding-top: 18px;
-    }
-
-
-    .herramientas {
-
-        gap: 8px;
-    }
-
-
-    .boton-nuevo,
-    .boton-recargar {
-
-        height: 46px;
-
-        font-size: 10px;
-    }
-
-
-    .lista-enlaces {
-
-        grid-template-columns:
-            1fr;
-
-        gap: 12px;
-    }
-
-
-    .tarjeta {
-
-        padding: 17px;
-    }
-
-
-    .nombre {
-
-        font-size: 17px;
-    }
-
-
-    .modal-fondo {
-
-        align-items:
-            flex-end;
-
-        padding:
-            0;
-    }
-
-
-    .modal {
-
-        width: 100%;
-
-        max-height:
-            92vh;
-
-        border-radius:
-            16px 16px 0 0;
-    }
-
-
-    .pie {
-
-        font-size: 8px;
-
-        gap: 7px;
-    }
-
-}
-
-
-
-@media (max-width: 400px) {
-
-    .boton-nuevo span:last-child {
-
-        display: none;
-    }
-
-
-    .boton-recargar span {
-
-        display: none;
-    }
-
-
-    .boton-nuevo {
-
-        min-width: 50px;
-    }
-
-
-    .boton-recargar {
-
-        min-width: 50px;
-    }
-
-}
+</html>

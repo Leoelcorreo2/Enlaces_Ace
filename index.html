@@ -1,48 +1,100 @@
 <!DOCTYPE html>
 <html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <meta name="theme-color" content="#0b0f14">
-    <meta name="description" content="Gestor de enlaces Ace Stream">
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <meta
+        name="theme-color"
+        content="#080b0f"
+    >
+
+    <meta
+        name="description"
+        content="Gestor de enlaces Ace Stream"
+    >
 
     <title>Gestor Ace Stream</title>
 
-    <link rel="stylesheet" href="estilos.css">
+    <link
+        rel="stylesheet"
+        href="estilos.css"
+    >
+
 </head>
+
 
 <body>
 
-    <!-- CABECERA -->
+
+    <!-- =====================================================
+         CABECERA
+         ===================================================== -->
+
     <header class="cabecera">
 
         <div class="logo-area">
-            <div class="logo-icon">▶</div>
+
+            <div class="logo-icon">
+                ▶
+            </div>
 
             <div>
-                <h1>ACE STREAM</h1>
-                <span>GESTOR DE ENLACES</span>
+
+                <h1>
+                    ACE STREAM
+                </h1>
+
+                <span>
+                    GESTOR DE ENLACES
+                </span>
+
             </div>
+
         </div>
 
+
         <div class="contador">
-            <span id="contadorEnlaces">0</span>
-            <small>ENLACES</small>
+
+            <span id="contadorEnlaces">
+                0
+            </span>
+
+            <small>
+                ENLACES
+            </small>
+
         </div>
 
     </header>
 
 
-    <!-- CONTENIDO PRINCIPAL -->
+
+    <!-- =====================================================
+         CONTENIDO
+         ===================================================== -->
+
     <main class="contenedor">
 
-        <!-- BARRA DE HERRAMIENTAS -->
+
+        <!-- =================================================
+             HERRAMIENTAS
+             ================================================= -->
+
         <section class="herramientas">
+
 
             <div class="buscador">
 
-                <span class="icono-busqueda">⌕</span>
+                <span class="icono-busqueda">
+                    ⌕
+                </span>
 
                 <input
                     type="text"
@@ -54,38 +106,86 @@
                 <button
                     id="limpiarBusqueda"
                     class="boton-limpiar"
-                    title="Limpiar búsqueda">
+                    title="Limpiar búsqueda"
+                >
                     ×
                 </button>
 
             </div>
 
+
+            <button
+                id="nuevoEnlace"
+                class="boton-nuevo"
+            >
+                <span class="boton-nuevo-icono">
+                    +
+                </span>
+
+                <span>
+                    NUEVO ENLACE
+                </span>
+            </button>
+
+
             <button
                 id="recargar"
                 class="boton-recargar"
-                title="Recargar enlaces">
+                title="Recargar enlaces"
+            >
                 ↻
-                <span>RECARGAR</span>
+
+                <span>
+                    RECARGAR
+                </span>
+
             </button>
 
+
         </section>
 
 
-        <!-- MENSAJES -->
-        <div id="mensaje" class="mensaje"></div>
+
+        <!-- =================================================
+             MENSAJES
+             ================================================= -->
+
+        <div
+            id="mensaje"
+            class="mensaje"
+        >
+        </div>
 
 
-        <!-- LISTADO -->
-        <section id="listaEnlaces" class="lista-enlaces">
+
+        <!-- =================================================
+             LISTADO
+             ================================================= -->
+
+        <section
+            id="listaEnlaces"
+            class="lista-enlaces"
+        >
         </section>
 
 
-        <!-- SIN RESULTADOS -->
-        <section id="sinResultados" class="sin-resultados oculto">
 
-            <div class="sin-resultados-icono">⌕</div>
+        <!-- =================================================
+             SIN RESULTADOS
+             ================================================= -->
 
-            <h2>No se encontraron enlaces</h2>
+        <section
+            id="sinResultados"
+            class="sin-resultados oculto"
+        >
+
+            <div class="sin-resultados-icono">
+                ⌕
+            </div>
+
+            <h2>
+                No se encontraron enlaces
+            </h2>
 
             <p>
                 Prueba con otro nombre, ID o nota.
@@ -93,22 +193,203 @@
 
         </section>
 
+
     </main>
 
 
-    <!-- PIE -->
+
+    <!-- =====================================================
+         MODAL NUEVO ENLACE
+         ===================================================== -->
+
+    <div
+        id="modalNuevo"
+        class="modal-fondo oculto"
+    >
+
+        <div class="modal">
+
+
+            <div class="modal-cabecera">
+
+                <div>
+
+                    <h2>
+                        NUEVO ENLACE
+                    </h2>
+
+                    <span>
+                        Añadir enlace local
+                    </span>
+
+                </div>
+
+
+                <button
+                    id="cerrarModal"
+                    class="modal-cerrar"
+                    title="Cerrar"
+                >
+                    ×
+                </button>
+
+            </div>
+
+
+
+            <form
+                id="formNuevoEnlace"
+                class="formulario"
+            >
+
+
+                <!-- NOMBRE -->
+
+                <div class="campo">
+
+                    <label for="nombreNuevo">
+                        NOMBRE
+                    </label>
+
+                    <input
+                        type="text"
+                        id="nombreNuevo"
+                        placeholder="Ej. Canal HD"
+                        maxlength="100"
+                        autocomplete="off"
+                    >
+
+                </div>
+
+
+
+                <!-- ID -->
+
+                <div class="campo">
+
+                    <label for="idNuevo">
+                        ID_ACES_STREAM
+                    </label>
+
+                    <input
+                        type="text"
+                        id="idNuevo"
+                        placeholder="Introduce el ID de Ace Stream"
+                        maxlength="100"
+                        autocomplete="off"
+                        required
+                    >
+
+                    <small>
+                        La URL se generará automáticamente.
+                    </small>
+
+                </div>
+
+
+
+                <!-- NOTA -->
+
+                <div class="campo">
+
+                    <label for="notaNuevo">
+                        NOTA / ORDEN
+                    </label>
+
+                    <input
+                        type="number"
+                        id="notaNuevo"
+                        placeholder="Ej. 10"
+                        min="0"
+                        max="999"
+                        step="1"
+                        value="0"
+                        required
+                    >
+
+                    <small>
+                        Los enlaces se mostrarán de mayor a menor nota.
+                    </small>
+
+                </div>
+
+
+
+                <!-- URL PREVISUALIZACION -->
+
+                <div class="campo">
+
+                    <label>
+                        URL GENERADA
+                    </label>
+
+                    <div
+                        id="urlPrevisualizacion"
+                        class="url-previsualizacion"
+                    >
+                        acestream://
+                    </div>
+
+                </div>
+
+
+
+                <!-- BOTONES -->
+
+                <div class="modal-botones">
+
+                    <button
+                        type="button"
+                        id="cancelarNuevo"
+                        class="boton-cancelar"
+                    >
+                        CANCELAR
+                    </button>
+
+
+                    <button
+                        type="submit"
+                        class="boton-crear"
+                    >
+                        ✓ CREAR ENLACE
+                    </button>
+
+                </div>
+
+
+            </form>
+
+
+        </div>
+
+    </div>
+
+
+
+    <!-- =====================================================
+         PIE
+         ===================================================== -->
+
     <footer class="pie">
 
-        <span>GESTOR DE ENLACES</span>
+        <span>
+            GESTOR DE ENLACES
+        </span>
 
-        <span class="separador">•</span>
+        <span class="separador">
+            •
+        </span>
 
-        <span id="estadoConexion">Cargando...</span>
+        <span id="estadoConexion">
+            Cargando...
+        </span>
 
     </footer>
+
 
 
     <script src="app.js"></script>
 
 </body>
+
 </html>

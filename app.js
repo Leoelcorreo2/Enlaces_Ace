@@ -1,18 +1,33 @@
 /* =========================================================
-   GESTOR ACE STREAM
+   GESTOR ACE STREAM - V2
    LÓGICA DE LA APLICACIÓN
    ========================================================= */
 
 "use strict";
 
 
+
+/* =========================================================
+   CONFIGURACIÓN
+   ========================================================= */
+
+const CLAVE_LOCAL_STORAGE =
+    "gestor_ace_stream_enlaces_locales_v2";
+
+
+
 /* =========================================================
    VARIABLES
    ========================================================= */
 
-let enlaces = [];
+let enlacesJSON = [];
+
+let enlacesLocales = [];
+
+let enlacesTodos = [];
 
 let enlacesFiltrados = [];
+
 
 
 /* =========================================================
@@ -31,6 +46,9 @@ const limpiarBusqueda =
 const recargar =
     document.getElementById("recargar");
 
+const nuevoEnlace =
+    document.getElementById("nuevoEnlace");
+
 const contadorEnlaces =
     document.getElementById("contadorEnlaces");
 
@@ -44,6 +62,35 @@ const estadoConexion =
     document.getElementById("estadoConexion");
 
 
+
+/* MODAL */
+
+const modalNuevo =
+    document.getElementById("modalNuevo");
+
+const cerrarModal =
+    document.getElementById("cerrarModal");
+
+const cancelarNuevo =
+    document.getElementById("cancelarNuevo");
+
+const formNuevoEnlace =
+    document.getElementById("formNuevoEnlace");
+
+const nombreNuevo =
+    document.getElementById("nombreNuevo");
+
+const idNuevo =
+    document.getElementById("idNuevo");
+
+const notaNuevo =
+    document.getElementById("notaNuevo");
+
+const urlPrevisualizacion =
+    document.getElementById("urlPrevisualizacion");
+
+
+
 /* =========================================================
    CARGAR JSON
    ========================================================= */
@@ -54,16 +101,12 @@ async function cargarEnlaces() {
 
     ocultarMensaje();
 
-    try {
 
-        /*
-         * Se añade un parámetro aleatorio para evitar
-         * que el navegador utilice una versión antigua
-         * del JSON almacenada en caché.
-         */
+    try {
 
         const cacheBuster =
             "?v=" + Date.now();
+
 
         const respuesta =
             await fetch(
@@ -86,32 +129,58 @@ async function cargarEnlaces() {
         if (!Array.isArray(datos)) {
 
             throw new Error(
-                "El formato del JSON no es válido"
+                "El formato de enlaces.json no es válido."
             );
         }
 
 
-        enlaces = datos.filter(
-            enlace => {
+        enlacesJSON =
+            datos
+                .filter(
+                    enlace =>
+                        enlace &&
+                        typeof enlace === "object"
+                )
+                .map(
+                    enlace => {
 
-                return enlace &&
-                    typeof enlace === "object";
-            }
-        );
+                        return {
+                            Nombre:
+                                enlace.Nombre || "Sin nombre",
+
+                            ID_Aces_Stream:
+                                enlace.ID_Aces_Stream || "",
+
+                            Nota:
+                                convertirNota(enlace.Nota),
+
+                            URL:
+                                enlace.URL ||
+                                generarURL(
+                                    enlace.ID_Aces_Stream
+                                ),
+
+                            local:
+                                false
+                        };
+
+                    }
+                );
 
 
-        enlacesFiltrados =
-            [...enlaces];
+        cargarEnlacesLocales();
 
+        combinarEnlaces();
+
+        ordenarEnlaces();
 
         actualizarContador();
 
-        renderizarEnlaces();
+        aplicarFiltroActual();
 
 
         estadoConexion.textContent =
             "DATOS ACTUALIZADOS";
-
 
         estadoConexion.style.color =
             "#35d07f";
@@ -121,48 +190,278 @@ async function cargarEnlaces() {
 
         console.error(error);
 
-        enlaces = [];
 
-        enlacesFiltrados = [];
+        enlacesJSON = [];
+
+        cargarEnlacesLocales();
+
+        combinarEnlaces();
+
+        ordenarEnlaces();
 
         actualizarContador();
 
-        listaEnlaces.innerHTML = "";
+        aplicarFiltroActual();
 
-        sinResultados.classList.add("oculto");
 
         mostrarMensaje(
-            "No se pudo cargar el fichero enlaces.json. " +
-            "Comprueba que existe en el mismo directorio que index.html.",
+            "No se pudo cargar enlaces.json. " +
+            "Los enlaces guardados localmente siguen disponibles.",
             "error"
         );
 
 
         estadoConexion.textContent =
-            "ERROR AL CARGAR DATOS";
-
+            "DATOS LOCALES";
 
         estadoConexion.style.color =
-            "#ff3b30";
+            "#ffb347";
+
     }
+
 }
 
 
+
 /* =========================================================
-   MOSTRAR CARGANDO
+   LOCAL STORAGE
    ========================================================= */
 
-function mostrarCargando() {
+function cargarEnlacesLocales() {
 
-    listaEnlaces.innerHTML =
-        '<div class="cargando">Cargando enlaces...</div>';
+    try {
 
-    sinResultados.classList.add("oculto");
+        const datos =
+            localStorage.getItem(
+                CLAVE_LOCAL_STORAGE
+            );
+
+
+        if (!datos) {
+
+            enlacesLocales = [];
+
+            return;
+        }
+
+
+        const parseados =
+            JSON.parse(datos);
+
+
+        if (!Array.isArray(parseados)) {
+
+            enlacesLocales = [];
+
+            return;
+        }
+
+
+        enlacesLocales =
+            parseados
+                .filter(
+                    enlace =>
+                        enlace &&
+                        typeof enlace === "object"
+                )
+                .map(
+                    enlace => {
+
+                        return {
+                            Nombre:
+                                enlace.Nombre ||
+                                "Enlace local",
+
+                            ID_Aces_Stream:
+                                enlace.ID_Aces_Stream ||
+                                "",
+
+                            Nota:
+                                convertirNota(
+                                    enlace.Nota
+                                ),
+
+                            URL:
+                                enlace.URL ||
+                                generarURL(
+                                    enlace.ID_Aces_Stream
+                                ),
+
+                            local:
+                                true,
+
+                            localId:
+                                enlace.localId ||
+                                generarIdLocal()
+                        };
+
+                    }
+                );
+
+
+    } catch (error) {
+
+        console.error(
+            "Error leyendo localStorage:",
+            error
+        );
+
+        enlacesLocales = [];
+    }
+
 }
 
 
+
 /* =========================================================
-   RENDERIZAR ENLACES
+   GUARDAR LOCAL STORAGE
+   ========================================================= */
+
+function guardarEnlacesLocales() {
+
+    try {
+
+        localStorage.setItem(
+            CLAVE_LOCAL_STORAGE,
+            JSON.stringify(
+                enlacesLocales
+            )
+        );
+
+
+        return true;
+
+
+    } catch (error) {
+
+        console.error(
+            "No se pudieron guardar los enlaces locales:",
+            error
+        );
+
+
+        mostrarMensaje(
+            "No se pudo guardar el enlace en este dispositivo.",
+            "error"
+        );
+
+
+        return false;
+    }
+
+}
+
+
+
+/* =========================================================
+   COMBINAR DATOS
+   ========================================================= */
+
+function combinarEnlaces() {
+
+    enlacesTodos = [
+        ...enlacesJSON,
+        ...enlacesLocales
+    ];
+
+}
+
+
+
+/* =========================================================
+   ORDENAR POR NOTA
+   ========================================================= */
+
+function ordenarEnlaces() {
+
+    /*
+     * Mayor nota primero.
+     *
+     * En caso de empate se mantiene el orden
+     * en el que estaban los elementos.
+     */
+
+    enlacesTodos.sort(
+        (a, b) => {
+
+            const notaA =
+                convertirNota(a.Nota);
+
+            const notaB =
+                convertirNota(b.Nota);
+
+
+            return notaB - notaA;
+        }
+    );
+
+}
+
+
+
+/* =========================================================
+   APLICAR FILTRO
+   ========================================================= */
+
+function aplicarFiltroActual() {
+
+    const texto =
+        buscador.value
+            .trim()
+            .toLowerCase();
+
+
+    if (!texto) {
+
+        enlacesFiltrados =
+            [...enlacesTodos];
+
+    } else {
+
+        enlacesFiltrados =
+            enlacesTodos.filter(
+                enlace => {
+
+                    const nombre =
+                        String(
+                            enlace.Nombre || ""
+                        ).toLowerCase();
+
+                    const id =
+                        String(
+                            enlace.ID_Aces_Stream || ""
+                        ).toLowerCase();
+
+                    const nota =
+                        String(
+                            enlace.Nota ?? ""
+                        ).toLowerCase();
+
+                    const url =
+                        String(
+                            enlace.URL || ""
+                        ).toLowerCase();
+
+
+                    return (
+                        nombre.includes(texto) ||
+                        id.includes(texto) ||
+                        nota.includes(texto) ||
+                        url.includes(texto)
+                    );
+
+                }
+            );
+    }
+
+
+    renderizarEnlaces();
+}
+
+
+
+/* =========================================================
+   RENDERIZAR
    ========================================================= */
 
 function renderizarEnlaces() {
@@ -172,37 +471,41 @@ function renderizarEnlaces() {
 
     if (enlacesFiltrados.length === 0) {
 
-        sinResultados.classList.remove("oculto");
+        sinResultados.classList.remove(
+            "oculto"
+        );
 
         return;
     }
 
 
-    sinResultados.classList.add("oculto");
+    sinResultados.classList.add(
+        "oculto"
+    );
 
 
     enlacesFiltrados.forEach(
-        (enlace, indice) => {
+        enlace => {
 
             const tarjeta =
-                crearTarjeta(
-                    enlace,
-                    indice
-                );
+                crearTarjeta(enlace);
 
             listaEnlaces.appendChild(
                 tarjeta
             );
+
         }
     );
+
 }
+
 
 
 /* =========================================================
    CREAR TARJETA
    ========================================================= */
 
-function crearTarjeta(enlace, indice) {
+function crearTarjeta(enlace) {
 
     const tarjeta =
         document.createElement("article");
@@ -212,45 +515,68 @@ function crearTarjeta(enlace, indice) {
         "tarjeta";
 
 
-    /* -----------------------------------------------------
-       DATOS
-       ----------------------------------------------------- */
+    if (enlace.local) {
+
+        tarjeta.classList.add(
+            "local"
+        );
+    }
+
 
     const nombre =
         limpiarTexto(
-            enlace.Nombre || "Sin nombre"
+            enlace.Nombre ||
+            "Sin nombre"
         );
 
 
     const idAce =
         limpiarTexto(
-            enlace.ID_Aces_Stream || ""
+            enlace.ID_Aces_Stream ||
+            ""
         );
 
 
     const nota =
-        limpiarTexto(
-            enlace.Nota ?? "-"
+        convertirNota(
+            enlace.Nota
         );
 
 
     const url =
         limpiarTexto(
-            enlace.URL || ""
+            enlace.URL ||
+            generarURL(idAce)
         );
 
 
-    /* -----------------------------------------------------
+
+    /* =====================================================
        HTML
-       ----------------------------------------------------- */
+       ===================================================== */
 
     tarjeta.innerHTML = `
 
         <div class="tarjeta-cabecera">
 
-            <h2 class="nombre">
-                ${escaparHTML(nombre)}
-            </h2>
+            <div>
+
+                <h2 class="nombre">
+                    ${escaparHTML(nombre)}
+                </h2>
+
+                ${
+                    enlace.local
+                        ? `
+                            <span class="indicador-local">
+                                LOCAL
+                            </span>
+                          `
+                        : ""
+                }
+
+            </div>
+
 
             <div class="nota">
 
@@ -277,12 +603,14 @@ function crearTarjeta(enlace, indice) {
 
                 <span
                     class="info-valor"
-                    title="${escaparHTML(idAce)}">
-
-                    ${escaparHTML(
-                        idAce || "No disponible"
-                    )}
-
+                    title="${escaparHTML(idAce)}"
+                >
+                    ${
+                        escaparHTML(
+                            idAce ||
+                            "No disponible"
+                        )
+                    }
                 </span>
 
             </div>
@@ -296,12 +624,14 @@ function crearTarjeta(enlace, indice) {
 
                 <span
                     class="info-valor"
-                    title="${escaparHTML(url)}">
-
-                    ${escaparHTML(
-                        url || "No disponible"
-                    )}
-
+                    title="${escaparHTML(url)}"
+                >
+                    ${
+                        escaparHTML(
+                            url ||
+                            "No disponible"
+                        )
+                    }
                 </span>
 
             </div>
@@ -313,20 +643,18 @@ function crearTarjeta(enlace, indice) {
 
             <button
                 class="boton-reproducir"
-                data-url="${escaparAtributo(url)}">
-
+                data-url="${escaparAtributo(url)}"
+            >
                 ▶ REPRODUCIR
-
             </button>
 
 
             <button
                 class="boton-copiar"
                 data-url="${escaparAtributo(url)}"
-                title="Copiar enlace">
-
+                title="Copiar enlace"
+            >
                 ⧉
-
             </button>
 
         </div>
@@ -334,9 +662,10 @@ function crearTarjeta(enlace, indice) {
     `;
 
 
-    /* -----------------------------------------------------
-       BOTON REPRODUCIR
-       ----------------------------------------------------- */
+
+    /* =====================================================
+       REPRODUCIR
+       ===================================================== */
 
     const botonReproducir =
         tarjeta.querySelector(
@@ -356,9 +685,10 @@ function crearTarjeta(enlace, indice) {
     );
 
 
-    /* -----------------------------------------------------
-       BOTON COPIAR
-       ----------------------------------------------------- */
+
+    /* =====================================================
+       COPIAR
+       ===================================================== */
 
     const botonCopiar =
         tarjeta.querySelector(
@@ -383,8 +713,9 @@ function crearTarjeta(enlace, indice) {
 }
 
 
+
 /* =========================================================
-   REPRODUCIR ACE STREAM
+   REPRODUCIR
    ========================================================= */
 
 function reproducir(url) {
@@ -400,14 +731,10 @@ function reproducir(url) {
     }
 
 
-    /*
-     * Si la URL no empieza por acestream://,
-     * intentamos igualmente abrirla como enlace.
-     */
-
     try {
 
-        window.location.href = url;
+        window.location.href =
+            url;
 
     } catch (error) {
 
@@ -417,12 +744,15 @@ function reproducir(url) {
             "No se pudo abrir el enlace.",
             "error"
         );
+
     }
+
 }
 
 
+
 /* =========================================================
-   COPIAR URL
+   COPIAR
    ========================================================= */
 
 async function copiarURL(url, boton) {
@@ -440,7 +770,9 @@ async function copiarURL(url, boton) {
 
     try {
 
-        await navigator.clipboard.writeText(url);
+        await navigator.clipboard.writeText(
+            url
+        );
 
 
         const textoOriginal =
@@ -482,56 +814,79 @@ async function copiarURL(url, boton) {
         console.error(error);
 
 
-        /*
-         * Método alternativo para navegadores
-         * que no permiten Clipboard API.
-         */
+        copiarURLAlternativa(
+            url
+        );
 
-        try {
-
-            const textarea =
-                document.createElement(
-                    "textarea"
-                );
-
-            textarea.value = url;
-
-            textarea.style.position =
-                "fixed";
-
-            textarea.style.opacity =
-                "0";
-
-            document.body.appendChild(
-                textarea
-            );
-
-            textarea.select();
-
-            document.execCommand(
-                "copy"
-            );
-
-            document.body.removeChild(
-                textarea
-            );
-
-
-            mostrarMensaje(
-                "Enlace copiado al portapapeles.",
-                "ok"
-            );
-
-
-        } catch (error2) {
-
-            mostrarMensaje(
-                "No se pudo copiar el enlace.",
-                "error"
-            );
-        }
     }
+
 }
+
+
+
+/* =========================================================
+   COPIA ALTERNATIVA
+   ========================================================= */
+
+function copiarURLAlternativa(url) {
+
+    try {
+
+        const textarea =
+            document.createElement(
+                "textarea"
+            );
+
+
+        textarea.value =
+            url;
+
+
+        textarea.style.position =
+            "fixed";
+
+        textarea.style.opacity =
+            "0";
+
+
+        document.body.appendChild(
+            textarea
+        );
+
+
+        textarea.select();
+
+
+        document.execCommand(
+            "copy"
+        );
+
+
+        document.body.removeChild(
+            textarea
+        );
+
+
+        mostrarMensaje(
+            "Enlace copiado al portapapeles.",
+            "ok"
+        );
+
+
+    } catch (error) {
+
+        console.error(error);
+
+
+        mostrarMensaje(
+            "No se pudo copiar el enlace.",
+            "error"
+        );
+
+    }
+
+}
+
 
 
 /* =========================================================
@@ -544,8 +899,7 @@ buscador.addEventListener(
 
         const texto =
             buscador.value
-                .trim()
-                .toLowerCase();
+                .trim();
 
 
         limpiarBusqueda.style.display =
@@ -554,52 +908,11 @@ buscador.addEventListener(
                 : "none";
 
 
-        if (!texto) {
+        aplicarFiltroActual();
 
-            enlacesFiltrados =
-                [...enlaces];
-
-        } else {
-
-            enlacesFiltrados =
-                enlaces.filter(
-                    enlace => {
-
-                        const nombre =
-                            String(
-                                enlace.Nombre || ""
-                            ).toLowerCase();
-
-                        const id =
-                            String(
-                                enlace.ID_Aces_Stream || ""
-                            ).toLowerCase();
-
-                        const nota =
-                            String(
-                                enlace.Nota || ""
-                            ).toLowerCase();
-
-                        const url =
-                            String(
-                                enlace.URL || ""
-                            ).toLowerCase();
-
-
-                        return (
-                            nombre.includes(texto) ||
-                            id.includes(texto) ||
-                            nota.includes(texto) ||
-                            url.includes(texto)
-                        );
-                    }
-                );
-        }
-
-
-        renderizarEnlaces();
     }
 );
+
 
 
 /* =========================================================
@@ -610,23 +923,25 @@ limpiarBusqueda.addEventListener(
     "click",
     () => {
 
-        buscador.value = "";
+        buscador.value =
+            "";
 
         limpiarBusqueda.style.display =
             "none";
 
-        enlacesFiltrados =
-            [...enlaces];
 
-        renderizarEnlaces();
+        aplicarFiltroActual();
+
 
         buscador.focus();
+
     }
 );
 
 
+
 /* =========================================================
-   RECARGAR
+   BOTON RECARGAR
    ========================================================= */
 
 recargar.addEventListener(
@@ -634,8 +949,431 @@ recargar.addEventListener(
     () => {
 
         cargarEnlaces();
+
     }
 );
+
+
+
+/* =========================================================
+   MODAL
+   ========================================================= */
+
+nuevoEnlace.addEventListener(
+    "click",
+    () => {
+
+        abrirModal();
+
+    }
+);
+
+
+cerrarModal.addEventListener(
+    "click",
+    () => {
+
+        cerrarModalNuevo();
+
+    }
+);
+
+
+cancelarNuevo.addEventListener(
+    "click",
+    () => {
+
+        cerrarModalNuevo();
+
+    }
+);
+
+
+
+/* =========================================================
+   CERRAR MODAL AL PULSAR FUERA
+   ========================================================= */
+
+modalNuevo.addEventListener(
+    "click",
+    evento => {
+
+        if (
+            evento.target ===
+            modalNuevo
+        ) {
+
+            cerrarModalNuevo();
+
+        }
+
+    }
+);
+
+
+
+/* =========================================================
+   ESC PARA CERRAR
+   ========================================================= */
+
+document.addEventListener(
+    "keydown",
+    evento => {
+
+        if (
+            evento.key === "Escape" &&
+            !modalNuevo.classList.contains(
+                "oculto"
+            )
+        ) {
+
+            cerrarModalNuevo();
+
+        }
+
+    }
+);
+
+
+
+/* =========================================================
+   ABRIR MODAL
+   ========================================================= */
+
+function abrirModal() {
+
+    modalNuevo.classList.remove(
+        "oculto"
+    );
+
+
+    formNuevoEnlace.reset();
+
+
+    notaNuevo.value =
+        "0";
+
+
+    actualizarPrevisualizacion();
+
+
+    setTimeout(
+        () => {
+
+            nombreNuevo.focus();
+
+        },
+        100
+    );
+
+}
+
+
+
+/* =========================================================
+   CERRAR MODAL
+   ========================================================= */
+
+function cerrarModalNuevo() {
+
+    modalNuevo.classList.add(
+        "oculto"
+    );
+
+
+    formNuevoEnlace.reset();
+
+
+    notaNuevo.value =
+        "0";
+
+
+    actualizarPrevisualizacion();
+
+}
+
+
+
+/* =========================================================
+   PREVISUALIZACION URL
+   ========================================================= */
+
+idNuevo.addEventListener(
+    "input",
+    actualizarPrevisualizacion
+);
+
+
+function actualizarPrevisualizacion() {
+
+    const id =
+        idNuevo.value.trim();
+
+
+    if (!id) {
+
+        urlPrevisualizacion.textContent =
+            "acestream://";
+
+        return;
+    }
+
+
+    urlPrevisualizacion.textContent =
+        generarURL(id);
+
+}
+
+
+
+/* =========================================================
+   CREAR NUEVO ENLACE
+   ========================================================= */
+
+formNuevoEnlace.addEventListener(
+    "submit",
+    evento => {
+
+        evento.preventDefault();
+
+
+        const nombre =
+            nombreNuevo.value.trim();
+
+
+        const id =
+            idNuevo.value.trim();
+
+
+        const nota =
+            convertirNota(
+                notaNuevo.value
+            );
+
+
+        /* ---------------------------------------------
+           VALIDACION ID
+           --------------------------------------------- */
+
+        if (!id) {
+
+            mostrarMensajeModal(
+                "Debes introducir un ID_Aces_Stream."
+            );
+
+            idNuevo.focus();
+
+            return;
+        }
+
+
+        /* ---------------------------------------------
+           VALIDAR ID
+           --------------------------------------------- */
+
+        if (
+            !validarIDAceStream(id)
+        ) {
+
+            mostrarMensajeModal(
+                "El ID_Aces_Stream contiene caracteres no válidos."
+            );
+
+            idNuevo.focus();
+
+            return;
+        }
+
+
+        /* ---------------------------------------------
+           COMPROBAR DUPLICADO
+           --------------------------------------------- */
+
+        const existe =
+            enlacesTodos.some(
+                enlace =>
+                    String(
+                        enlace.ID_Aces_Stream
+                    ).toLowerCase() ===
+                    id.toLowerCase()
+            );
+
+
+        if (existe) {
+
+            mostrarMensajeModal(
+                "Ese ID_Aces_Stream ya existe en la aplicación."
+            );
+
+            idNuevo.focus();
+
+            return;
+        }
+
+
+        /* ---------------------------------------------
+           CREAR OBJETO
+           --------------------------------------------- */
+
+        const nuevo = {
+
+            Nombre:
+                nombre ||
+                "Nuevo enlace",
+
+            ID_Aces_Stream:
+                id,
+
+            Nota:
+                nota,
+
+            URL:
+                generarURL(id),
+
+            local:
+                true,
+
+            localId:
+                generarIdLocal()
+
+        };
+
+
+        /* ---------------------------------------------
+           GUARDAR
+           --------------------------------------------- */
+
+        enlacesLocales.push(
+            nuevo
+        );
+
+
+        const guardado =
+            guardarEnlacesLocales();
+
+
+        if (!guardado) {
+
+            return;
+        }
+
+
+        /* ---------------------------------------------
+           ACTUALIZAR LISTADO
+           --------------------------------------------- */
+
+        combinarEnlaces();
+
+        ordenarEnlaces();
+
+        actualizarContador();
+
+        aplicarFiltroActual();
+
+
+        /* ---------------------------------------------
+           CERRAR MODAL
+           --------------------------------------------- */
+
+        cerrarModalNuevo();
+
+
+        mostrarMensaje(
+            "Enlace creado y guardado en este dispositivo.",
+            "ok"
+        );
+
+
+        setTimeout(
+            ocultarMensaje,
+            2500
+        );
+
+    }
+);
+
+
+
+/* =========================================================
+   VALIDAR ID ACE STREAM
+   ========================================================= */
+
+function validarIDAceStream(id) {
+
+    /*
+     * Permitimos letras, números y algunos caracteres
+     * habituales de identificadores.
+     */
+
+    return /^[a-zA-Z0-9_-]+$/.test(
+        id
+    );
+
+}
+
+
+
+/* =========================================================
+   GENERAR URL
+   ========================================================= */
+
+function generarURL(id) {
+
+    if (!id) {
+
+        return "acestream://";
+
+    }
+
+
+    return "acestream://" + id;
+
+}
+
+
+
+/* =========================================================
+   GENERAR ID LOCAL
+   ========================================================= */
+
+function generarIdLocal() {
+
+    return (
+        Date.now().toString(36) +
+        Math.random()
+            .toString(36)
+            .substring(2, 9)
+    );
+
+}
+
+
+
+/* =========================================================
+   CONVERTIR NOTA
+   ========================================================= */
+
+function convertirNota(valor) {
+
+    const numero =
+        Number(valor);
+
+
+    if (
+        !Number.isFinite(numero)
+    ) {
+
+        return 0;
+
+    }
+
+
+    return Math.round(
+        numero
+    );
+
+}
+
 
 
 /* =========================================================
@@ -645,35 +1383,93 @@ recargar.addEventListener(
 function actualizarContador() {
 
     contadorEnlaces.textContent =
-        enlaces.length;
+        enlacesTodos.length;
+
 }
+
 
 
 /* =========================================================
    MENSAJES
    ========================================================= */
 
-function mostrarMensaje(texto, tipo) {
+function mostrarMensaje(
+    texto,
+    tipo
+) {
 
     mensaje.textContent =
         texto;
 
+
     mensaje.className =
-        "mensaje visible " + tipo;
+        "mensaje visible " +
+        tipo;
+
 }
 
 
 function ocultarMensaje() {
 
-    mensaje.textContent = "";
+    mensaje.textContent =
+        "";
+
 
     mensaje.className =
         "mensaje";
+
 }
 
 
+
 /* =========================================================
-   LIMPIEZA DE TEXTO
+   MENSAJE DEL MODAL
+   ========================================================= */
+
+function mostrarMensajeModal(
+    texto
+) {
+
+    /*
+     * Para no complicar el formulario con otro elemento,
+     * utilizamos el mensaje general.
+     */
+
+    mostrarMensaje(
+        texto,
+        "error"
+    );
+
+
+    setTimeout(
+        ocultarMensaje,
+        3500
+    );
+
+}
+
+
+
+/* =========================================================
+   CARGANDO
+   ========================================================= */
+
+function mostrarCargando() {
+
+    listaEnlaces.innerHTML =
+        '<div class="cargando">Cargando enlaces...</div>';
+
+
+    sinResultados.classList.add(
+        "oculto"
+    );
+
+}
+
+
+
+/* =========================================================
+   LIMPIAR TEXTO
    ========================================================= */
 
 function limpiarTexto(valor) {
@@ -682,33 +1478,83 @@ function limpiarTexto(valor) {
         .replace(/\r/g, "")
         .replace(/\n/g, " ")
         .trim();
+
 }
 
 
+
 /* =========================================================
-   SEGURIDAD HTML
+   ESCAPAR HTML
    ========================================================= */
 
 function escaparHTML(texto) {
 
     return String(texto)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        );
+
 }
 
+
+
+/* =========================================================
+   ESCAPAR ATRIBUTO
+   ========================================================= */
 
 function escaparAtributo(texto) {
 
     return String(texto)
-        .replace(/&/g, "&amp;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;");
+
+        .replace(
+            /&/g,
+            "&amp;"
+        )
+
+        .replace(
+            /"/g,
+            "&quot;"
+        )
+
+        .replace(
+            /'/g,
+            "&#039;"
+        )
+
+        .replace(
+            /</g,
+            "&lt;"
+        )
+
+        .replace(
+            />/g,
+            "&gt;"
+        );
+
 }
+
 
 
 /* =========================================================

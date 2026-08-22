@@ -31,8 +31,9 @@
    "density": "2.0"
   },
   {
-   //"src": "icons\/android-icon-144x144.png",
-   "src": "https://leoelcorreo2.github.io/Enlaces_Ace/icons/android-icon-144x144.png",  
+ 
+   //"src": "https://leoelcorreo2.github.io/Enlaces_Ace/icons/android-icon-144x144.png",  
+   "src": "icons\/android-icon-144x144.png",
    "sizes": "144x144",
    "type": "image\/png",
    "purpose": "any maskable",

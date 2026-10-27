@@ -35,3 +35,5 @@ Por tanto:
 📄 Los 7 enlaces del enlaces.json sí aparecen en cualquier dispositivo.
 
 Esto nos deja una base muy buena para la siguiente evolución: editar y borrar los enlaces locales y, sobre todo, podemos añadir un botón de "Exportar enlaces" que genere un nuevo enlaces.json con los enlaces locales incorporados. Así podrías llevar ese JSON a GitHub y sincronizar todos los dispositivos sin necesidad de montar todavía una base de datos.
+
+Nota importante: Los enlaces que se se encuentran en el fichero enlaces.json, son enlaces para realizar pruebas de desarrollo, la idea es mostrar como se verían los enlaces que se vayan añadiendo. No se garantiza que sean reproducibles, ni que el contenido al que se acceda sea legal. Será responsabilidad de la persona que ejecuta la app el reproducir o no el contenido enlazado.

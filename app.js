@@ -1,5 +1,5 @@
 /* =========================================================
-   GESTOR ACE STREAM - V2.1
+   GESTOR ACE STREAM - V2.2
    ========================================================= */
 
 "use strict";
@@ -9,7 +9,7 @@
    CONFIGURACION
    ========================================================= */
 
-const VERSION_APP = "2.1";
+const VERSION_APP = "2.2";
 
 const CLAVE_LOCAL_STORAGE =
     "gestor_ace_stream_enlaces_locales_v21";
@@ -53,6 +53,10 @@ const recargar =
     document.getElementById(
         "recargar"
     );
+
+const exportarJSON = document.getElementById("exportarJSON");
+const importarJSON = document.getElementById("importarJSON");
+const archivoJSON = document.getElementById("archivoJSON");
 
 const nuevoEnlace =
     document.getElementById(
@@ -307,6 +311,17 @@ function configurarEventos() {
         "click",
         cargarEnlaces
     );
+
+    /* EXPORTAR TODOS LOS ENLACES */
+    if (exportarJSON) {
+        exportarJSON.addEventListener("click", exportarEnlacesJSON);
+    }
+
+    /* IMPORTAR JSON */
+    if (importarJSON && archivoJSON) {
+        importarJSON.addEventListener("click", function () { archivoJSON.click(); });
+        archivoJSON.addEventListener("change", importarEnlacesJSON);
+    }
 
 }
 
@@ -1699,6 +1714,132 @@ function crearNuevoEnlace(
 
 }
 
+
+
+/* =========================================================
+   EXPORTAR TODOS LOS ENLACES A JSON
+   Incluye los enlaces de GitHub y los enlaces locales.
+   ========================================================= */
+function exportarEnlacesJSON() {
+    try {
+        const todos = [...enlacesTodos]
+            .sort((a, b) => convertirNota(b.Nota) - convertirNota(a.Nota))
+            .map(enlace => ({
+                Nombre: String(enlace.Nombre || "Sin nombre").trim(),
+                ID_Aces_Stream: String(enlace.ID_Aces_Stream || "").trim(),
+                Nota: convertirNota(enlace.Nota),
+                URL: String(enlace.URL || generarURL(enlace.ID_Aces_Stream)).trim()
+            }))
+            .filter(enlace => enlace.ID_Aces_Stream);
+
+        const contenido = JSON.stringify(todos, null, 2);
+        const blob = new Blob([contenido], { type: "application/json;charset=utf-8" });
+        const urlTemporal = URL.createObjectURL(blob);
+        const enlaceDescarga = document.createElement("a");
+        enlaceDescarga.href = urlTemporal;
+        enlaceDescarga.download = "enlaces.json";
+        document.body.appendChild(enlaceDescarga);
+        enlaceDescarga.click();
+        enlaceDescarga.remove();
+        setTimeout(() => URL.revokeObjectURL(urlTemporal), 1000);
+        mostrarMensaje("Exportación completada: " + todos.length + " enlaces guardados en enlaces.json.", "ok");
+        setTimeout(ocultarMensaje, 3500);
+    } catch (error) {
+        console.error("Error exportando JSON:", error);
+        mostrarMensaje("No se pudo exportar el archivo JSON.", "error");
+    }
+}
+
+/* =========================================================
+   IMPORTAR ENLACES JSON COMO ENLACES LOCALES
+   Admite un array JSON de objetos con Nombre, ID_Aces_Stream,
+   Nota y URL. Valida todo antes de guardar cambios.
+   ========================================================= */
+async function importarEnlacesJSON(evento) {
+    const archivo = evento.target.files && evento.target.files[0];
+    if (!archivo) return;
+
+    try {
+        const texto = await archivo.text();
+        const datos = JSON.parse(texto);
+        if (!Array.isArray(datos)) {
+            throw new Error("El archivo debe contener un array JSON (una lista entre corchetes).");
+        }
+        if (datos.length === 0) {
+            throw new Error("El archivo JSON no contiene enlaces.");
+        }
+
+        const importados = [];
+        const idsVistos = new Set();
+        for (let i = 0; i < datos.length; i++) {
+            const item = datos[i];
+            if (!item || typeof item !== "object" || Array.isArray(item)) {
+                throw new Error("El elemento " + (i + 1) + " no es un objeto válido.");
+            }
+            const id = String(item.ID_Aces_Stream || "").trim();
+            if (!id || !validarIDAceStream(id)) {
+                throw new Error("El elemento " + (i + 1) + " no tiene un ID_Aces_Stream válido.");
+            }
+            const idNormalizado = id.toLowerCase();
+            if (idsVistos.has(idNormalizado)) continue;
+            idsVistos.add(idNormalizado);
+            importados.push({
+                Nombre: String(item.Nombre || ("Enlace " + (i + 1))).trim() || ("Enlace " + (i + 1)),
+                ID_Aces_Stream: id,
+                Nota: convertirNota(item.Nota),
+                URL: normalizarURLImportada(item.URL, id),
+                local: true,
+                localId: generarIdLocal()
+            });
+        }
+
+        if (!importados.length) throw new Error("No se encontraron enlaces válidos para importar.");
+
+        const idsExistentes = new Set(enlacesTodos.map(e => String(e.ID_Aces_Stream || "").trim().toLowerCase()));
+        const nuevos = importados.filter(e => !idsExistentes.has(e.ID_Aces_Stream.toLowerCase()));
+        const duplicados = importados.length - nuevos.length;
+
+        if (!nuevos.length) {
+            mostrarMensaje("No se ha añadido ningún enlace: todos los IDs ya existen en la aplicación.", "error");
+            return;
+        }
+
+        const confirmar = window.confirm(
+            "Se van a importar " + nuevos.length + " enlaces nuevos." +
+            (duplicados ? "\nSe omitirán " + duplicados + " IDs que ya existen." : "") +
+            "\n\nSe añadirán a los enlaces actuales y se guardarán solo en este dispositivo. ¿Continuar?"
+        );
+        if (!confirmar) return;
+
+        const anteriores = [...enlacesLocales];
+        enlacesLocales = [...enlacesLocales, ...nuevos];
+        if (!guardarEnlacesLocales()) {
+            enlacesLocales = anteriores;
+            return;
+        }
+
+        combinarEnlaces();
+        ordenarEnlaces();
+        actualizarContador();
+        aplicarFiltroActual();
+        mostrarMensaje("Importación completada: " + nuevos.length + " enlaces añadidos" + (duplicados ? "; " + duplicados + " duplicados omitidos" : "") + ".", "ok");
+        setTimeout(ocultarMensaje, 4000);
+    } catch (error) {
+        console.error("Error importando JSON:", error);
+        mostrarMensaje("No se pudo importar el JSON: " + (error.message || "formato no válido"), "error");
+    } finally {
+        // Permite seleccionar de nuevo el mismo archivo y volver a importarlo.
+        evento.target.value = "";
+    }
+}
+
+function normalizarURLImportada(url, id) {
+    const valor = String(url || "").trim();
+    // Se fuerza el esquema esperado para que la URL coincida con el ID.
+    if (!valor || valor.toLowerCase() === "acestream://") return generarURL(id);
+    if (/^acestream:\/\//i.test(valor)) return valor;
+    return generarURL(id);
+}
 
 
 /* =========================================================
